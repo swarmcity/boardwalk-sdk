@@ -54,6 +54,6 @@ jobs:
         run: |
           forge create --mnemonic ./mnemonic MarketplaceFactory
 
-      - name: Start blockchain
+      - name: Stop blockchain
         run: |
           killall anvil
