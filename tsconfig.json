@@ -15,6 +15,6 @@
     "rootDirs": ["src"],
     "module": "es2015",
     "outDir": "dist",
-    "types": ["node"]
+    "types": ["node", "jest"]
   },
 }
