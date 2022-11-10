@@ -3,7 +3,7 @@ name: Tests
 on:
   pull_request:
     branches:
-      - '**'
+      - "**"
 
 env:
   FOUNDRY_PROFILE: ci
@@ -44,3 +44,6 @@ jobs:
       - name: Stop blockchain
         run: |
           killall anvil
+
+      - name: Run linting test
+        run: npm run lint

@@ -15,7 +15,9 @@
     "blockchain": "anvil",
     "blockchain:prepare": "cd ./boardwalk-contracts && npm ci && echo 'test test test test test test test test test test test junk' > mnemonic && cd ..",
     "blockchain:build": "cd ./boardwalk-contracts && forge build --sizes &&  cd ..",
-    "blockchain:build-types": "./generate-types.sh"
+    "blockchain:build-types": "./generate-types.sh",
+    "lint": "eslint . --ext .ts,.tsx && prettier -c .",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix && prettier -w . "
   },
   "repository": {
     "type": "git",
@@ -32,8 +34,15 @@
     "@typechain/ethers-v5": "^10.1.1",
     "@types/jest": "^29.2.2",
     "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-unicorn": "^44.0.2",
     "ethers": "*",
     "jest": "^29.3.1",
+    "prettier": "^2.7.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",

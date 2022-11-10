@@ -16,5 +16,5 @@
     "module": "es2015",
     "outDir": "dist",
     "types": ["node", "jest"]
-  },
+  }
 }
