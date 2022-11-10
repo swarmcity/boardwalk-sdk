@@ -2,7 +2,7 @@ import { execSync } from 'child_process'
 import { JsonRpcProvider } from '@ethersproject/providers'
 import { Contract, Wallet } from 'ethers'
 import { writeFile } from 'fs/promises'
-import {getERC20, getMarketplaceFactory} from '../src/index'
+import {getERC20, getMarketplaceFactory, getMarketplaceList} from '../src/index'
 
 const OUT_FILE = './test/test-addresses.json'
 const PRIVATE_KEYS = [
@@ -42,17 +42,23 @@ async function deployMarketplaceFactory(deployer: Wallet): Promise<Contract> {
     return marketplaceFactory
 }
 
+async function deployMarketplaceList(deployer: Wallet): Promise<Contract> {
+    console.log(`MarketplaceList: deploying`)
+    const address = execSync(`cd ${contracts_dir} && forge create --mnemonic ./mnemonic MarketplaceList | grep 'Deployed to: ' | sed 's/Deployed to: //g'`, { encoding: 'utf-8' }).trim();
+    console.log(`MarketplaceList: deployed to ${address}`)
+    const marketplaceList = getMarketplaceList(address, deployer)
+    return marketplaceList
+}
+
 export default async function testsSetup(): Promise<void> {
     const erc20 = await deployERC20(deployer, 18, 'testDAI', 'tDAI')
     const marketplaceFactory = await deployMarketplaceFactory(deployer)
-    console.log({
-        marketplaceFactory: marketplaceFactory.address,
-        marketplaceToken: erc20.address,
-    })
+    const marketplaceList = await deployMarketplaceList(deployer)
 
     await writeFile(OUT_FILE, JSON.stringify({
         PRIVATE_KEYS,
-        MARKETPLACE_FACTORY_ADDRESS: marketplaceFactory.address,
         MARKETPLACE_TOKEN_ADDRESS: erc20.address,
+        MARKETPLACE_FACTORY_ADDRESS: marketplaceFactory.address,
+        MARKETPLACE_LIST_ADDRESS: marketplaceList.address
     }, null, 2))
 }
