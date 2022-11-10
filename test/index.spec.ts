@@ -9,6 +9,10 @@ const marketplaceFactoryDeployer = new Wallet(PRIVATE_KEYS[0], provider)
 const marketplaceFactory = getMarketplaceFactory(MARKETPLACE_FACTORY_ADDRESS, marketplaceFactoryDeployer)
 const marketplaceToken = getERC20(MARKETPLACE_TOKEN_ADDRESS, marketplaceFactoryDeployer)
 
+afterAll(async () => {
+    await provider.destroy()
+})
+
 describe('MarketplaceToken', () => {
     test('is successfully deployed ', async () => {
         expect(await marketplaceToken.decimals()).toEqual(18)
@@ -16,13 +20,6 @@ describe('MarketplaceToken', () => {
         expect(await marketplaceToken.symbol()).toEqual('tDAI')
     })
 })
-
-interface EventData {
-    marketplaceAddress: string
-    marketplaceName: string
-    providerRepAddress: string
-    seekerRepAddress: string
-}
 
 describe('MarketplaceFactory', () => {
     test('should create new marketplace ', async () => {
