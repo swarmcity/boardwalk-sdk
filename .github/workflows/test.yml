@@ -32,27 +32,9 @@ jobs:
         with:
           version: nightly
 
-      - name: Install dependencies and prepare wallet
-        run: | 
-          npm run blockchain:prepare
-
-      - name: Run Forge build
-        working-directory: ./boardwalk-contracts
-        run: |
-          forge --version
-          forge build --sizes
-        id: build
-
-      - name: Run Forge tests
-        working-directory: ./boardwalk-contracts
-        run: |
-          forge test -vvv
-        id: test
-
       - name: Start blockchain
         run: |
           anvil &
-          sleep 5
 
       - name: Install npm deps
         run: npm ci
