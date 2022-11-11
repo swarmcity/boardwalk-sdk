@@ -25,7 +25,7 @@ const PRIVATE_KEYS = [
 const provider = new JsonRpcProvider("http://127.0.0.1:8545");
 const deployer = new Wallet(PRIVATE_KEYS[0], provider);
 
-const contracts_dir = "./boardwalk-contracts";
+const contracts_dir = "./lib/boardwalk-contracts";
 
 // ERC20 token
 async function deployERC20(

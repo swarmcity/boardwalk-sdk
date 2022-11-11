@@ -1,5 +1,3 @@
 node_modules
 dist
-test/**/*.js
-src/**/*.js
 src/abi

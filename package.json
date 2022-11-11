@@ -13,8 +13,8 @@
     "check:types": "tsc --project tsconfig.test.json",
     "test": "jest --verbose --detectOpenHandles",
     "blockchain": "anvil",
-    "blockchain:prepare": "cd ./boardwalk-contracts && npm ci && echo 'test test test test test test test test test test test junk' > mnemonic && cd ..",
-    "blockchain:build": "cd ./boardwalk-contracts && forge build --sizes &&  cd ..",
+    "blockchain:prepare": "cd ./lib/boardwalk-contracts && npm ci && echo 'test test test test test test test test test test test junk' > mnemonic && cd ../..",
+    "blockchain:build": "cd ./lib/boardwalk-contracts && forge build --sizes &&  cd ../..",
     "blockchain:build-types": "./generate-types.sh",
     "lint": "eslint . --ext .ts,.tsx && prettier -c .",
     "lint:fix": "eslint . --ext .ts,.tsx --fix && prettier -w . "

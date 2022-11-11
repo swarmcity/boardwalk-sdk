@@ -1,6 +1,6 @@
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "boardwalk-contracts"]
-	path = boardwalk-contracts
+[submodule "lib/boardwalk-contracts"]
+	path = lib/boardwalk-contracts
 	url = git@github.com:swarmcity/boardwalk-contracts.git
