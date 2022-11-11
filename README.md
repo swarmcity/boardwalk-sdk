@@ -1,6 +1,6 @@
 # boardwalk-sdk
 
-> SDK to build decentraclised marketplaces on top of EVM blockchain and waku.
+> SDK to build decentralised marketplaces on top of EVM blockchain and waku.
 
 **Warning: This project is in active develoment. There might (and most probably will) be changes in the future to its API and working. Also, no guarantees can be made about its stability, efficiency, and security at this stage.**
 

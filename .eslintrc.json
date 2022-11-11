@@ -31,11 +31,5 @@
       "version": "detect"
     }
   },
-  "ignorePatterns": [
-    "boardwalk-contracts",
-    "src/abi",
-    "lib",
-    "dist",
-    "test/test-addresses.json"
-  ]
+  "ignorePatterns": ["src/abi", "lib", "dist", "test/test-addresses.json"]
 }
