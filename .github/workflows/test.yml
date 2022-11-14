@@ -13,8 +13,63 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_VERSION: 18
+
     strategy:
       fail-fast: true
+
+    services:
+      waku:
+        image: statusteam/nim-waku:v0.12.0
+        restart: unless-stopped
+        command: |
+          --nat:pmp
+          --relay:true
+          --persist-messages:true
+          --store:true
+          --store-capacity:150000
+          --sqlite-store:true
+          --sqlite-retention-time:31536000
+          --filter:true
+          --lightpush:true
+          --websocket-support:true
+          --db-path:/db
+          --rpc-address:0.0.0.0
+          --nodekey:${{ secrets.NODEKEY }}
+        volumes:
+          - ./db:/db
+        ports:
+          - 60000:60000/tcp
+        networks:
+          - public
+        labels:
+          traefik.enable: "true"
+          traefik.docker.network: "public"
+          traefik.http.routers.waku-ws.rule: "Host(`ws.waku.apyos.dev`)"
+          traefik.http.routers.waku-ws.entrypoints: "http,https"
+          traefik.http.routers.waku-ws.service: "waku-ws"
+          traefik.http.routers.waku-ws.middlewares: "waku-ws-redirect"
+          traefik.http.routers.waku-ws.tls: "true"
+          traefik.http.routers.waku-ws.tls.certresolver: "letsencrypt"
+          traefik.http.middlewares.waku-ws-redirect.redirectscheme.scheme: "https"
+          traefik.http.middlewares.waku-ws-redirect.redirectscheme.permanent: "true"
+          traefik.http.services.waku-ws.loadBalancer.server.port: 8000
+          traefik.http.services.waku-ws.loadBalancer.server.scheme: "http"
+          traefik.http.routers.waku-rpc.rule: "Host(`rpc.waku.apyos.dev`)"
+          traefik.http.routers.waku-rpc.entrypoints: "http,https"
+          traefik.http.routers.waku-rpc.service: "waku-rpc"
+          traefik.http.routers.waku-rpc.middlewares: "waku-rpc-redirect"
+          traefik.http.routers.waku-rpc.tls: "true"
+          traefik.http.routers.waku-rpc.tls.certresolver: "letsencrypt"
+          traefik.http.middlewares.waku-rpc-redirect.redirectscheme.scheme: "https"
+          traefik.http.middlewares.waku-rpc-redirect.redirectscheme.permanent: "true"
+          traefik.http.services.waku-rpc.loadBalancer.server.port: 8545
+          traefik.http.services.waku-rpc.loadBalancer.server.scheme: "http"
+        logging:
+          driver: "json-file"
+          options:
+            max-size: "100m"
+            max-file: "3"
+            compress: "true"
 
     steps:
       - uses: actions/checkout@v3
