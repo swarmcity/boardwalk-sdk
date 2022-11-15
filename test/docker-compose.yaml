@@ -15,6 +15,6 @@ services:
       --websocket-support:true
       --db-path:/db
       --rpc-address:0.0.0.0
-      --nodekey:${{ secrets.NODEKEY }}
+      --nodekey:${NODEKEY}
     ports:
       - 60000:60000/tcp
