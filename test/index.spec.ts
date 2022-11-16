@@ -1,5 +1,6 @@
 import { WebSocketProvider } from "@ethersproject/providers";
 import { Wallet } from "ethers";
+import { describe, test, afterAll, expect } from "vitest";
 import {
   getMarketplaceFactory,
   getERC20,
