@@ -2,3 +2,4 @@ src/abi
 lib
 dist
 test/test-addresses.json
+package-lock.json
