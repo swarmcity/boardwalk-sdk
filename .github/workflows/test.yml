@@ -3,7 +3,7 @@ name: Tests
 on:
   pull_request:
     branches:
-      - "**"
+      - '**'
 
 env:
   FOUNDRY_PROFILE: ci
@@ -22,7 +22,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: "Start nim waku"
+      - name: 'Start nim waku'
         run: npm run waku:start
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
