@@ -24,8 +24,6 @@ jobs:
 
       - name: "Run Docker services"
         run: docker-compose -f ./test/docker-compose.yaml up -d
-        env:
-          NODEKEY: ${{ secrets.NODEKEY }}
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3

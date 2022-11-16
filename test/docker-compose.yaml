@@ -15,6 +15,7 @@ services:
       --websocket-support:true
       --db-path:/db
       --rpc-address:0.0.0.0
-      --nodekey:${NODEKEY}
+      --nodekey:7b8d9a670aae6421500b7b3f933d0b5d08b51fcf0f0c2f14cba3a4737c83a228
     ports:
       - 60000:60000/tcp
+      - 8000:8000/tcp
