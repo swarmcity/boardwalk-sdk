@@ -10,8 +10,12 @@ export async function getWaku(options?: CreateOptions): Promise<WakuLight> {
 
   await waku.start();
 
-  // @ts-expect-error Some weird bug with [inspect]
-  await waku.dial(multiaddr("/ip4/0.0.0.0/tcp/60000"));
+  await waku.dial(
+    // @ts-expect-error Some weird bug with [inspect]
+    multiaddr(
+      "/ip4/127.0.0.1/tcp/60000/ws/p2p/16Uiu2HAmV2LtgL5Rx4WhnMShcZbXadkT8Lfa2GC38aJ7hDzKhPuo"
+    )
+  );
 
   return waku;
 }

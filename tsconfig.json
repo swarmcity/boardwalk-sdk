@@ -1,5 +1,5 @@
 {
-  "include": ["src", "test", "jest.config.ts"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "alwaysStrict": true,
@@ -15,6 +15,6 @@
     "rootDirs": ["src"],
     "module": "es2015",
     "outDir": "dist",
-    "types": ["node", "jest"]
+    "types": ["node"]
   }
 }

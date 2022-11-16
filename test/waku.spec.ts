@@ -1,3 +1,4 @@
+import { describe, test, afterEach, expect } from "vitest";
 import { getWaku } from "../src/waku";
 import {
   DecoderV0,
