@@ -12,10 +12,12 @@
     "build:types": "tsc --emitDeclarationOnly --declaration --outDir dist/types",
     "check:types": "tsc --project tsconfig.test.json",
     "test": "vitest",
-    "blockchain": "anvil",
+    "blockchain:start": "anvil",
     "blockchain:prepare": "cd ./lib/boardwalk-contracts && npm ci && echo 'test test test test test test test test test test test junk' > mnemonic && cd ../..",
     "blockchain:build": "cd ./lib/boardwalk-contracts && forge build --sizes &&  cd ../..",
     "blockchain:build-types": "./generate-types.sh",
+    "waku:start": "docker-compose -f ./test/docker-compose.yaml up -d",
+    "waku:stop": "docker kill test-waku-1",
     "lint": "eslint . --ext .ts,.tsx && prettier -c .",
     "lint:fix": "eslint . --ext .ts,.tsx --fix && prettier -w . "
   },

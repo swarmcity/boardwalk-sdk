@@ -40,19 +40,22 @@ curl -L https://foundry.paradigm.xyz | bash
 foundryup
 ```
 
-3. Install dependencies. This will also install dependencies for the `boardwalk-contracts` and compile them.
+3. Make sure you have Docker running.
+
+4. Install dependencies. This will also install dependencies for the `boardwalk-contracts` and compile them.
 
 ```
 npm ci
 ```
 
-4. Run a blockchain (if not already).
+5. Run a blockchain and waku (if not already).
 
 ```
-npm run blockchain
+npm run blockchain:start
+npm run waku:start
 ```
 
-5. Run tests
+6. Run tests
 
 ```
 npm run test

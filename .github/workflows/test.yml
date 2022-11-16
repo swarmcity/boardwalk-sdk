@@ -22,8 +22,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: "Run Docker services"
-        run: docker-compose -f ./test/docker-compose.yaml up -d
+      - name: "Start nim waku"
+        run: npm run waku:start
 
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
@@ -37,8 +37,7 @@ jobs:
           version: nightly
 
       - name: Start blockchain
-        run: |
-          anvil &
+        run: npm run blockchain:start &
 
       - name: Install npm deps
         run: npm ci
@@ -46,10 +45,6 @@ jobs:
       - name: Run tests
         run: |
           npm run test
-
-      - name: Stop blockchain
-        run: |
-          killall anvil
 
       - name: Run linting test
         run: npm run lint
