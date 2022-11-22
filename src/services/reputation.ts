@@ -1,29 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Contract } from 'ethers'
-import { useProvider } from 'wagmi'
-
 // Types
-import type { BigNumber } from 'ethers'
+import type { Signer } from 'ethers'
+import type { Provider } from '@ethersproject/providers'
 
 // ABIs
-import erc20Abi from '../abis/erc20.json'
+import { ERC20__factory } from '../abi/factories/ERC20__factory'
 
-export const useReputationContract = (contract?: string) => {
-	const provider = useProvider()
-	return useMemo(() => contract && new Contract(contract, erc20Abi, provider), [contract])
-}
+export const getReputationContract = ERC20__factory.connect
 
-export const useReputation = (token?: string, user?: string) => {
-	const contract = useReputationContract(token)
-	const [balance, setBalance] = useState<BigNumber>()
-
-	useEffect(() => {
-		if (!contract || !user) {
-			return
-		}
-
-		contract.balanceOf(user).then(setBalance)
-	}, [contract])
-
-	return balance
+export const getReputation = async (
+	token: string,
+	user: string,
+	signerOrProvider: Signer | Provider,
+) => {
+	const contract = getReputationContract(token, signerOrProvider)
+	return await contract.balanceOf(user)
 }
