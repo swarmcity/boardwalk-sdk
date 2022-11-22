@@ -1,20 +1,14 @@
-import { PageDirection } from 'js-waku'
+import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 
 import { fileArrayBuffer, getHash, isFile } from './utils'
-import { postWakuMessage } from './waku'
+import { fetchLatestTopicData, postWakuMessage } from './waku'
 
 // Protos
 import { ProfilePicture } from './protos/profile-picture'
 
-import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 // Types
-import type { Decoder, Message, WakuLight } from 'js-waku/lib/interfaces'
-import type { QueryOptions } from 'js-waku/lib/waku_store'
-
-// Custom types
-export type WithPayload<Msg extends Message> = Msg & {
-	get payload(): Uint8Array
-}
+import type { WakuLight } from 'js-waku/lib/interfaces'
+import type { WithPayload } from './types'
 
 export const getProfilePictureTopic = (hash: string) => {
 	return `/swarmcity/1/profile-picture-${hash}/proto`
@@ -46,46 +40,6 @@ export const createProfilePicture = async (
 		}),
 	)
 	return { hash, message }
-}
-
-export const wrapFilterCallback = <Msg extends Message>(
-	callback: (message: Promise<Msg | undefined>) => Promise<unknown>,
-) => {
-	return (message: Msg) => {
-		callback(Promise.resolve(message))
-	}
-}
-
-export const fetchLatestTopicData = <Msg extends Message>(
-	waku: WakuLight,
-	decoders: Decoder<Msg>[],
-	callback: <Done extends boolean>(
-		message: Done extends true ? Promise<undefined> : Promise<Msg | undefined>,
-		done?: Done,
-	) => Promise<boolean | void>,
-	options?: QueryOptions | undefined,
-	watch?: boolean,
-) => {
-	// eslint-disable-next-line @typescript-eslint/no-extra-semi
-	;(async () => {
-		const generator = waku.store.queryGenerator(decoders, {
-			pageDirection: PageDirection.BACKWARD,
-			pageSize: 1,
-		})
-
-		for await (const messages of generator) {
-			for (const message of messages) {
-				if (await callback(message)) {
-					return
-				}
-			}
-		}
-
-		callback(Promise.resolve(undefined), true)
-	})()
-
-	if (watch)
-		return { unsubscribe: waku.filter.subscribe(decoders, wrapFilterCallback(callback), options) }
 }
 
 const decodeMessage = (message: WithPayload<MessageV0>): ProfilePicture | false => {

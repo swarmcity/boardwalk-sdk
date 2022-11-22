@@ -53,4 +53,10 @@ describe('create and retrieve profile picture', () => {
 		expect(retrieveRes.picture.type).toBe('unknown')
 		expect(retrieveRes.picture.data.toString()).toEqual(imgUint8Array.toString())
 	})
+
+	test('should throw on hash that does not store anything', async () => {
+		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
+
+		await expect(retrieveProfilePicture(waku, '0x00')).rejects.toThrow('')
+	})
 })
