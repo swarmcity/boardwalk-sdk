@@ -2,7 +2,9 @@ import { multiaddr } from '@multiformats/multiaddr'
 import { Protocols } from 'js-waku'
 import { createLightNode, CreateOptions } from 'js-waku/lib/create_waku'
 import { waitForRemotePeer } from 'js-waku/lib/wait_for_remote_peer'
+import { EncoderV0 } from 'js-waku/lib/waku_message/version_0'
 
+// Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
 
 const defaultOptions: CreateOptions = {}
@@ -23,4 +25,15 @@ export async function getWaku(
 	await waitForRemotePeer(waku, protocols)
 
 	return waku
+}
+
+export const postWakuMessage = async (waku: WakuLight, topic: string, payload: Uint8Array) => {
+	// Post the metadata on Waku
+	const message = { payload }
+
+	// Send the message
+	await waku.lightPush.push(new EncoderV0(topic), { payload })
+
+	// Return message
+	return message
 }
