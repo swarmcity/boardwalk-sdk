@@ -1,10 +1,10 @@
 import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 
-import { fileArrayBuffer, getHash, isFile } from './utils'
-import { fetchLatestTopicData, postWakuMessage } from './waku'
+import { fileArrayBuffer, getHash, isFile } from '../lib/utils'
+import { fetchLatestTopicData, postWakuMessage } from '../lib/waku'
 
 // Protos
-import { ProfilePicture } from './protos/profile-picture'
+import { ProfilePicture } from '../protos/profile-picture'
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
