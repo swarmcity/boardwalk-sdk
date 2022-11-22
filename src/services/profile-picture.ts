@@ -8,7 +8,7 @@ import { ProfilePicture } from './protos/profile-picture'
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
-import type { WithPayload } from './types'
+import type { WithPayload } from '../lib/types'
 
 export const getProfilePictureTopic = (hash: string) => {
 	return `/swarmcity/1/profile-picture-${hash}/proto`
