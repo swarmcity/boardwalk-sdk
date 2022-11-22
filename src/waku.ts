@@ -1,9 +1,12 @@
 import { multiaddr } from '@multiformats/multiaddr'
-import { Protocols } from 'js-waku'
+import { Protocols, PageDirection } from 'js-waku'
 import { createLightNode, CreateOptions } from 'js-waku/lib/create_waku'
 import { waitForRemotePeer } from 'js-waku/lib/wait_for_remote_peer'
+import { EncoderV0 } from 'js-waku/lib/waku_message/version_0'
 
-import type { WakuLight } from 'js-waku/lib/interfaces'
+// Types
+import type { Decoder, Message, WakuLight } from 'js-waku/lib/interfaces'
+import type { QueryOptions } from 'js-waku/lib/waku_store'
 
 const defaultOptions: CreateOptions = {}
 
@@ -23,4 +26,55 @@ export async function getWaku(
 	await waitForRemotePeer(waku, protocols)
 
 	return waku
+}
+
+export const postWakuMessage = async (waku: WakuLight, topic: string, payload: Uint8Array) => {
+	// Post the metadata on Waku
+	const message = { payload }
+
+	// Send the message
+	await waku.lightPush.push(new EncoderV0(topic), { payload })
+
+	// Return message
+	return message
+}
+
+export const fetchLatestTopicData = <Msg extends Message>(
+	waku: WakuLight,
+	decoders: Decoder<Msg>[],
+	callback: <Done extends boolean>(
+		message: Done extends true ? Promise<undefined> : Promise<Msg | undefined>,
+		done?: Done,
+	) => Promise<boolean | void>,
+	options?: QueryOptions | undefined,
+	watch?: boolean,
+) => {
+	// eslint-disable-next-line @typescript-eslint/no-extra-semi
+	;(async () => {
+		const generator = waku.store.queryGenerator(decoders, {
+			pageDirection: PageDirection.BACKWARD,
+			pageSize: 1,
+		})
+
+		for await (const messages of generator) {
+			for (const message of messages) {
+				if (await callback(message)) {
+					return
+				}
+			}
+		}
+
+		callback(Promise.resolve(undefined), true)
+	})()
+
+	if (watch)
+		return { unsubscribe: waku.filter.subscribe(decoders, wrapFilterCallback(callback), options) }
+}
+
+export const wrapFilterCallback = <Msg extends Message>(
+	callback: (message: Promise<Msg | undefined>) => Promise<unknown>,
+) => {
+	return (message: Msg) => {
+		callback(Promise.resolve(message))
+	}
 }

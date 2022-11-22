@@ -31,5 +31,12 @@
 			"version": "detect"
 		}
 	},
-	"ignorePatterns": ["src/abi", "lib", "dist", "test/test-addresses.json", "package-lock.json"]
+	"ignorePatterns": [
+		"src/abi",
+		"lib",
+		"dist",
+		"test/test-addresses.json",
+		"package-lock.json",
+		"/src/protos/*.ts"
+	]
 }
