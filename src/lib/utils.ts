@@ -1,4 +1,5 @@
 import { BytesLike, ethers } from 'ethers'
+import { DeferredPromise } from 'p-defer'
 
 export function getHash(buffer: BytesLike): string {
 	return ethers.utils.sha256(buffer)
@@ -43,4 +44,10 @@ export async function fileArrayBuffer(file: File): Promise<ArrayBuffer> {
 		fr.onload = () => resolve(fr.result as ArrayBuffer)
 		fr.readAsArrayBuffer(file)
 	})
+}
+
+export const throwIfFasly = <Data>(defer: DeferredPromise<Data>, error?: string) => {
+	return (result?: Data) => {
+		result ? defer.resolve(result) : defer.reject(new Error(error))
+	}
 }

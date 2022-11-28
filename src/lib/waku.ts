@@ -7,6 +7,7 @@ import { EncoderV0 } from 'js-waku/lib/waku_message/version_0'
 // Types
 import type { Decoder, Message, WakuLight } from 'js-waku/lib/interfaces'
 import type { QueryOptions } from 'js-waku/lib/waku_store'
+import type { WithPayload } from './types'
 
 const defaultOptions: CreateOptions = {}
 
@@ -39,13 +40,10 @@ export const postWakuMessage = async (waku: WakuLight, topic: string, payload: U
 	return message
 }
 
-export const fetchLatestTopicData = <Msg extends Message>(
+export const subscribeToLatestTopicData = <Msg extends Message>(
 	waku: WakuLight,
 	decoders: Decoder<Msg>[],
-	callback: <Done extends boolean>(
-		message: Done extends true ? Promise<undefined> : Promise<Msg | undefined>,
-		done?: Done,
-	) => Promise<boolean | void>,
+	callback: (message?: Promise<Msg | undefined>) => Promise<boolean>,
 	options?: QueryOptions | undefined,
 	watch?: boolean,
 ) => {
@@ -64,17 +62,45 @@ export const fetchLatestTopicData = <Msg extends Message>(
 			}
 		}
 
-		callback(Promise.resolve(undefined), true)
+		callback()
 	})()
 
-	if (watch)
-		return { unsubscribe: waku.filter.subscribe(decoders, wrapFilterCallback(callback), options) }
+	if (watch) {
+		return {
+			unsubscribe: waku.filter.subscribe(decoders, wrapFilterCallback(callback), options),
+		}
+	}
 }
 
 export const wrapFilterCallback = <Msg extends Message>(
 	callback: (message: Promise<Msg | undefined>) => Promise<unknown>,
 ) => {
-	return (message: Msg) => {
-		callback(Promise.resolve(message))
+	return (message: Msg) => void callback(Promise.resolve(message))
+}
+
+export type DecodeStoreCallback<Data, Msg extends Message> = { data: Data; message: Msg }
+
+export const decodeStore = <Data, Msg extends Message>(
+	decodeMessage: (message: WithPayload<Msg>) => Data | false,
+	callback: (result?: DecodeStoreCallback<Data, Msg>) => void,
+) => {
+	return async (msg: Promise<Msg | undefined> | undefined) => {
+		if (!msg) {
+			callback()
+			return true
+		}
+
+		const message = (await msg) as WithPayload<Msg>
+		if (!message) {
+			return false
+		}
+
+		const data = decodeMessage(message)
+		if (data) {
+			callback({ data, message })
+			return true
+		}
+
+		return false
 	}
 }

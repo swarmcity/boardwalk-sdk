@@ -1,7 +1,14 @@
 import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
+import pDefer from 'p-defer'
 
-import { fileArrayBuffer, getHash, isFile } from '../lib/utils'
-import { fetchLatestTopicData, postWakuMessage } from '../lib/waku'
+// Lib
+import { fileArrayBuffer, getHash, isFile, throwIfFasly } from '../lib/utils'
+import {
+	subscribeToLatestTopicData,
+	postWakuMessage,
+	decodeStore,
+	DecodeStoreCallback,
+} from '../lib/waku'
 
 // Protos
 import { ProfilePicture } from '../protos/profile-picture'
@@ -50,31 +57,28 @@ const decodeMessage = (message: WithPayload<MessageV0>): ProfilePicture | false 
 	}
 }
 
-interface ProfilePictureRes {
-	picture: ProfilePicture
-	payload: Uint8Array
-}
+type ProfilePictureRes = DecodeStoreCallback<ProfilePicture, MessageV0>
 
-export const retrieveProfilePicture = async (
+export const subscribeToProfilePicture = async (
 	waku: WakuLight,
 	hash: string,
-): Promise<ProfilePictureRes> => {
+	callback: (response?: ProfilePictureRes) => void,
+	watch = true,
+) => {
 	if (!hash) {
 		throw new Error('No hash was provided')
 	}
 
 	const decoders = [new DecoderV0(getProfilePictureTopic(hash))]
-	return new Promise<ProfilePictureRes>((resolve, reject) => {
-		fetchLatestTopicData(waku, decoders, async (msg: Promise<MessageV0 | undefined>) => {
-			const message = (await msg) as WithPayload<MessageV0>
-			if (!message) {
-				reject(new Error('Could not fetch profile picture'))
-			}
+	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback), {}, watch)
+}
 
-			const picture = decodeMessage(message)
-			if (picture) {
-				resolve({ picture, payload: message.payload })
-			}
-		})
-	})
+export const getProfilePicture = async (
+	waku: WakuLight,
+	hash: string,
+): Promise<ProfilePictureRes> => {
+	const defer = pDefer<ProfilePictureRes>()
+	const callback = throwIfFasly(defer, 'Could not fetch profile picture')
+	await subscribeToProfilePicture(waku, hash, callback, false)
+	return defer.promise
 }
