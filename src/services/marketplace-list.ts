@@ -1,17 +1,15 @@
-import { Contract, utils } from 'ethers'
-import { useEffect, useMemo } from 'react'
-import { useProvider } from 'wagmi'
-import createStore from 'teaful'
+import { Signer, utils } from 'ethers'
 import { defaultAbiCoder, getAddress } from 'ethers/lib/utils'
 
 // Lib
-import { readLocalStore, updateLocalStore } from '../../../lib/store'
-import { shouldUpdate } from '../../../lib/blockchain'
+import { shouldUpdate } from '../lib/blockchain'
 
-// Config
-import { MARKETPLACE_LIST } from '../../../config'
+// Types
+import type { Provider } from '@ethersproject/providers'
 
-const PREFIX = 'marketplace-list'
+// ABIs
+import { MarketplaceList__factory } from '../abi'
+
 const EVENT_ADDED = utils.id('MarketplaceAdded(address,string)')
 const EVENT_REMOVED = utils.id('MarketplaceRemoved(address)')
 
@@ -25,83 +23,58 @@ export type MarketplaceListItem = {
 
 export type MarketplaceList = Record<string, MarketplaceListItem>
 
-type MarketplaceStore = {
-	list: MarketplaceList | undefined
-	lastBlock: number | undefined
+export const getMarketplaceListContract = (
+	address: string,
+	signerOrProvider: Signer | Provider,
+) => {
+	return MarketplaceList__factory.connect(address, signerOrProvider)
 }
 
-// Store
-const { useStore } = createStore<MarketplaceStore>(
-	{
-		list: readLocalStore('list', PREFIX),
-		lastBlock: readLocalStore('lastBlock', PREFIX),
-	},
-	({ store, prevStore }) => {
-		updateLocalStore(store, prevStore, 'list', PREFIX)
-		updateLocalStore(store, prevStore, 'lastBlock', PREFIX)
-	},
-)
+export const getMarketplaceList = async (
+	provider: Provider,
+	address: string,
+	fromBlock?: number,
+) => {
+	const contract = getMarketplaceListContract(address, provider)
+	const marketplaces: MarketplaceList = {}
+	const events = await contract.queryFilter(
+		{
+			address,
+			topics: [[EVENT_ADDED, EVENT_REMOVED]],
+		},
+		(fromBlock ?? -1) + 1,
+	)
 
-export const useMarketplaceList = () => {
-	const [list] = useStore.list()
-	return list
-}
+	let lastBlock = fromBlock
 
-export const useMarketplaceListSync = () => {
-	// State
-	const [list, setList] = useStore.list()
-	const [lastBlock, setLastBlock] = useStore.lastBlock()
+	for (const event of events) {
+		const { topics, data, blockNumber, transactionIndex } = event
+		const address = getAddress(topics[1].substring(topics[1].length - 40))
 
-	// Wagmi
-	const provider = useProvider()
-	const contract = useMemo(() => new Contract(MARKETPLACE_LIST, [], provider), [provider])
+		if (!shouldUpdate(event, marketplaces[address])) {
+			continue
+		}
 
-	useEffect(() => {
-		const marketplaces = { ...list }
-
-		;(async () => {
-			let currentBlock = lastBlock
-			const events = await contract.queryFilter(
-				{
-					address: MARKETPLACE_LIST,
-					topics: [[EVENT_ADDED, EVENT_REMOVED]],
-				},
-				(lastBlock ?? -1) + 1,
-			)
-
-			for (const event of events) {
-				const { topics, data, blockNumber, transactionIndex } = event
-				const address = getAddress(topics[1].substring(topics[1].length - 40))
-
-				if (!shouldUpdate(event, marketplaces[address])) {
-					continue
+		switch (topics[0]) {
+			case EVENT_ADDED:
+				const [name] = defaultAbiCoder.decode(['string'], data)
+				marketplaces[address] = {
+					name,
+					address,
+					blockNumber,
+					transactionIndex,
 				}
+				break
 
-				switch (topics[0]) {
-					case EVENT_ADDED:
-						const [name] = defaultAbiCoder.decode(['string'], data)
-						marketplaces[address] = {
-							name,
-							address,
-							blockNumber,
-							transactionIndex,
-						}
-						break
-
-					case EVENT_REMOVED:
-						if (marketplaces[address]) {
-							marketplaces[address].deleted = true
-						}
-						break
+			case EVENT_REMOVED:
+				if (marketplaces[address]) {
+					marketplaces[address].deleted = true
 				}
+				break
+		}
 
-				currentBlock = event.blockNumber
-			}
+		lastBlock = event.blockNumber
+	}
 
-			setLastBlock(currentBlock)
-			setList(marketplaces)
-		})()
-	}, [contract])
-
-	return list
+	return { marketplaces, lastBlock }
 }
