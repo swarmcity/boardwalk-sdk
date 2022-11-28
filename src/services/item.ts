@@ -4,14 +4,11 @@ import { splitSignature } from '@ethersproject/bytes'
 import type { Signer } from 'ethers'
 
 // Services
-import {
-	getMarketplaceContract,
-	getMarketplaceTokenContract,
-} from '../pages/marketplaces/services/marketplace'
+import { getMarketplaceContract, getMarketplaceTokenContract } from './marketplace'
 import { setTheirChatKeys } from './chat'
 
 // Protos
-import { KeyExchange } from './protos/key-exchange'
+import { KeyExchange } from '../protos/key-exchange'
 
 export const fundItem = async (
 	signer: Signer,
