@@ -1,32 +1,27 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-	DecoderV0,
-	EncoderV0,
-	MessageV0,
-} from 'js-waku/lib/waku_message/version_0'
+import { DecoderV0, EncoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import { BigNumber, Contract, Event } from 'ethers'
-import { useProvider, useWebSocketProvider } from 'wagmi'
 import { Interface } from 'ethers/lib/utils'
 import { Log } from '@ethersproject/providers'
 
 // Types
 import type { Signer } from 'ethers'
 import type { WakuLight } from 'js-waku/lib/interfaces'
-import type { UpdateTime } from '../../../lib/blockchain'
+import type { UpdateTime } from '../lib/blockchain'
+import type { WithPayload } from '../lib/types'
 
 // Protos
-import { ItemMetadata } from '../../../protos/item-metadata'
+import { ItemMetadata } from '../protos/item-metadata'
 
 // ABIs
 import marketplaceAbi from '../../../abis/marketplace.json'
 import erc20Abi from '../../../abis/erc20.json'
 
 // Lib
-import { bufferToHex, numberToBigInt } from '../../../lib/tools'
-import { shouldUpdate } from '../../../lib/blockchain'
+import { bufferToHex, numberToBigInt } from '../lib/tools'
+import { shouldUpdate } from '../lib/blockchain'
 
 // Services
-import { useWakuStoreQuery, WithPayload } from '../../../services/waku'
+import { subscribeToWakuStoreQuery } from '../lib/waku'
 
 // Status
 export enum Status {
@@ -82,7 +77,7 @@ export const createItem = async (
 	waku: WakuLight,
 	marketplace: string,
 	{ price, description }: CreateItem,
-	signer: Signer
+	signer: Signer,
 ) => {
 	// Create the metadata
 	const payload = ItemMetadata.encode({ description })
@@ -120,9 +115,7 @@ export const createItem = async (
 	return args.id.toBigInt()
 }
 
-const decodeWakuMessage = async (
-	message: WithPayload<MessageV0>
-): Promise<WakuItem> => {
+const decodeWakuMessage = async (message: WithPayload<MessageV0>): Promise<WakuItem> => {
 	const hash = await crypto.subtle.digest('SHA-256', message.payload)
 	return {
 		hash: '0x' + bufferToHex(hash),
@@ -157,10 +150,7 @@ export const useGetWakuItems = (marketplace: string) => {
 	return { ...state, lastUpdate, items }
 }
 
-const decodeNewItemEvent = async (
-	event: Event,
-	iface: Interface
-): Promise<ChainItem> => {
+const decodeNewItemEvent = async (event: Event, iface: Interface): Promise<ChainItem> => {
 	const { args } = iface.parseLog(event)
 
 	return {
@@ -178,7 +168,7 @@ const decodeNewItemEvent = async (
 
 const decodeStatusChangeEvent = async (
 	event: Event,
-	iface: Interface
+	iface: Interface,
 ): Promise<StatusChangeEvent> => {
 	const { args } = iface.parseLog(event)
 
@@ -188,10 +178,7 @@ const decodeStatusChangeEvent = async (
 	}
 }
 
-const decodeFundItemEvent = async (
-	event: Event,
-	iface: Interface
-): Promise<FundItemEvent> => {
+const decodeFundItemEvent = async (event: Event, iface: Interface): Promise<FundItemEvent> => {
 	const { args } = iface.parseLog(event)
 
 	return {
@@ -216,11 +203,11 @@ export const useGetMarketplaceItems = (address: string) => {
 	const wsProvider = useWebSocketProvider()
 	const contract = useMemo(
 		() => new Contract(address, marketplaceAbi, provider),
-		[provider, address]
+		[provider, address],
 	)
 	const wsContract = useMemo(
 		() => new Contract(address, marketplaceAbi, wsProvider),
-		[wsProvider, address]
+		[wsProvider, address],
 	)
 
 	useEffect(() => {
@@ -231,7 +218,7 @@ export const useGetMarketplaceItems = (address: string) => {
 			id: BigNumber,
 			metadata: string,
 			status: Status,
-			transactionHash: string
+			transactionHash: string,
 		) => {
 			for (const item of indexed[metadata]) {
 				if (item.id.eq(id)) {
@@ -283,7 +270,7 @@ export const useGetMarketplaceItems = (address: string) => {
 					address: contract.address,
 					topics: [[newItem, statusChange, fundItem]],
 				},
-				0
+				0,
 			)
 
 			for (const event of events) {
@@ -306,10 +293,7 @@ export const useGetMarketplaceItems = (address: string) => {
 					case statusChange:
 						// eslint-disable-next-line no-lone-blocks
 						{
-							const { id, status } = await decodeStatusChangeEvent(
-								event,
-								contract.interface
-							)
+							const { id, status } = await decodeStatusChangeEvent(event, contract.interface)
 							const data = metadata[id.toString()]
 
 							if (shouldUpdate(event, data)) {
@@ -321,10 +305,7 @@ export const useGetMarketplaceItems = (address: string) => {
 					case fundItem:
 						// eslint-disable-next-line no-lone-blocks
 						{
-							const { id, provider } = await decodeFundItemEvent(
-								event,
-								contract.interface
-							)
+							const { id, provider } = await decodeFundItemEvent(event, contract.interface)
 
 							updateProvider(id, provider)
 						}
