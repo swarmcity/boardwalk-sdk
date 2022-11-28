@@ -1,23 +1,32 @@
 import { arrayify, hexlify } from '@ethersproject/bytes'
 import { getAddress } from '@ethersproject/address'
-import { MessageV0 } from 'js-waku/lib/waku_message/version_0'
+import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
+import pDefer from 'p-defer'
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { Signer } from 'ethers'
+import type { WithPayload } from '../lib/types'
 
 // Protos
 import { PermitProvider, SelectProvider } from '../protos/select-provider'
 import { KeyExchange } from '../protos/key-exchange'
 
-// Services
-import { postWakuMessage, useLatestTopicData, WithPayload } from './waku'
+// Lib
+import {
+	decodeStore,
+	DecodeStoreCallback,
+	postWakuMessage,
+	subscribeToLatestTopicData,
+} from '../lib/waku'
 import {
 	createSignedPayload,
 	decodeSignedPayload,
 	EIP712Config,
 	verifyPayload,
 } from '../lib/eip-712'
+
+// Services
 import { getKeyExchange, setTheirTempChatKeys } from './chat'
 
 type Marketplace = {
@@ -167,11 +176,25 @@ const decodeMessage = (message: WithPayload<MessageV0>): SelectProvider | false 
 	return verify ? selectProvider : false
 }
 
-export const useSelectProvider = (marketplace: string, itemId: bigint) => {
-	const { data, ...state } = useLatestTopicData(
-		getSelectProviderTopic(marketplace, itemId),
-		decodeMessage,
-		true,
-	)
-	return { ...state, data }
+type SelectProviderResult = DecodeStoreCallback<SelectProvider, MessageV0>
+
+export const subscribeToSelectProvider = async (
+	waku: WakuLight,
+	marketplace: string,
+	itemId: bigint,
+	callback: (response?: SelectProviderResult) => void,
+	watch = true,
+) => {
+	const decoders = [new DecoderV0(getSelectProviderTopic(marketplace, itemId))]
+	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback), {}, watch)
+}
+
+export const getSelectProvider = async (
+	waku: WakuLight,
+	marketplace: string,
+	itemId: bigint,
+): Promise<SelectProviderResult | undefined> => {
+	const defer = pDefer<SelectProviderResult | undefined>()
+	await subscribeToSelectProvider(waku, marketplace, itemId, defer.resolve, false)
+	return defer.promise
 }

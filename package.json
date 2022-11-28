@@ -45,7 +45,7 @@
 		"ethers": "*",
 		"p-defer": "^4.0.0",
 		"prettier": "^2.7.1",
-		"protons": "^6.0.1",
+		"protons": "^5.1.0",
 		"rimraf": "^3.0.2",
 		"typechain": "^8.1.1",
 		"typescript": "^4.9.3",
