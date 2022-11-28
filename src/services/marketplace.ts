@@ -8,7 +8,7 @@ import { Marketplace__factory } from '../abi'
 import type { FundItemEvent, ItemStatusChangeEvent } from '../abi/Marketplace'
 
 // Lib
-import { cleanOutput } from '../lib/ethers'
+import { cleanOutput, getProvider } from '../lib/ethers'
 
 // Services
 import type { Status } from './items'
@@ -69,9 +69,16 @@ export const getMarketplaceConfig = async <Keys extends keyof MarketplaceConfig>
 	}, {} as Pick<MarketplaceConfig, Keys>)
 }
 
-export const getMarketplaceTokenContract = async (marketplace: string, provider: Provider) => {
-	const { token } = await getMarketplaceConfig(marketplace, ['token'], provider)
-	return getERC20Contract(token, provider)
+export const getMarketplaceTokenContract = async (
+	marketplace: string,
+	signerOrProvider: Signer | Provider,
+) => {
+	const { token } = await getMarketplaceConfig(
+		marketplace,
+		['token'],
+		getProvider(signerOrProvider),
+	)
+	return getERC20Contract(token, signerOrProvider)
 }
 
 export const getMarketplaceTokenDecimals = async (address: string, provider: Provider) => {

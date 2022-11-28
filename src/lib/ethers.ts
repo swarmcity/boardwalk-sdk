@@ -1,4 +1,7 @@
-import { BigNumber } from 'ethers'
+import { BigNumber, Signer } from 'ethers'
+
+// Types
+import type { Provider } from '@ethersproject/providers'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const cleanOutput = <Type>(object: Array<any>): Type => {
@@ -19,4 +22,12 @@ export const cleanOutput = <Type>(object: Array<any>): Type => {
 	}
 
 	return result
+}
+
+export const getProvider = (signerOrProvider: Signer | Provider): Provider => {
+	const provider = Signer.isSigner(signerOrProvider) ? signerOrProvider.provider : signerOrProvider
+	if (!provider) {
+		throw new Error('signer does not have a provider')
+	}
+	return provider
 }
