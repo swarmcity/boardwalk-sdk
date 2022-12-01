@@ -1,5 +1,5 @@
 import { describe, test, afterEach, expect } from 'vitest'
-import { getWaku } from '../src/waku'
+import { getWaku } from '../src/lib/waku'
 import { DecoderV0, EncoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import { Protocols } from 'js-waku'
 import pDefer from 'p-defer'
