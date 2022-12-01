@@ -1,9 +1,4 @@
-import { BytesLike, ethers } from 'ethers'
 import { Buffer } from 'node:buffer'
-
-export function getHash(buffer: BytesLike): string {
-	return ethers.utils.sha256(buffer)
-}
 
 /**
  * Compatibility functions for working with File API objects

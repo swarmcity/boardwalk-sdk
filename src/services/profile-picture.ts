@@ -1,8 +1,9 @@
 import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import pDefer from 'p-defer'
+import { sha256 } from '@ethersproject/sha2'
 
 // Lib
-import { blobArrayBuffer, getHash, isBlob } from '../lib/utils'
+import { blobArrayBuffer, isBlob } from '../lib/blob'
 import {
 	subscribeToLatestTopicData,
 	postWakuMessage,
@@ -44,7 +45,7 @@ export const createProfilePicture = async <Data extends Uint8Array | Blob>(
 		throw new Error('unknown image type')
 	}
 
-	const hash = getHash(buffer)
+	const hash = sha256(buffer)
 	const message = await postWakuMessage(
 		waku,
 		getProfilePictureTopic(hash),

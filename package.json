@@ -55,6 +55,7 @@
 		"ethers": ">=5.7.2"
 	},
 	"dependencies": {
+		"@ethersproject/sha2": "^5.7.0",
 		"@multiformats/multiaddr": "11.0.7",
 		"js-waku": "0.30.0"
 	}
