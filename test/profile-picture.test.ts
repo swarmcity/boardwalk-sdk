@@ -43,15 +43,9 @@ describe('create and retrieve profile picture', () => {
 		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
 		const imgUint8Array = new Uint8Array(file.buffer)
 
-		const uploadRes = await createProfilePicture(waku, imgUint8Array)
-
-		const retrieveRes = await getProfilePicture(waku, uploadRes.hash)
-
-		expect(uploadRes.hash).toBe(
-			'0x031f532d2380310307bd35f03c98d76ce0907d61e9ff4fd8128bd56835eabf37',
+		expect(createProfilePicture(waku, imgUint8Array)).rejects.toEqual(
+			new Error('unknown image type'),
 		)
-		expect(retrieveRes.data.type).toBe('unknown')
-		expect(retrieveRes.data.data.toString()).toEqual(imgUint8Array.toString())
 	})
 
 	test('should throw on hash that does not store anything', async () => {
