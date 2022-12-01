@@ -11,9 +11,9 @@
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"typeRoots": ["./src/types", "node_modules/@types"],
-		"target": "es2015",
+		"target": "es2020",
 		"rootDirs": ["src"],
-		"module": "es2015",
+		"module": "es2020",
 		"outDir": "dist",
 		"types": ["node"]
 	}
