@@ -22,6 +22,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
         with:
@@ -33,11 +38,6 @@ jobs:
 
       - name: Run linting test
         run: npm run lint
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly
 
       - name: 'Start nim waku'
         run: npm run waku:start
