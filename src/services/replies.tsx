@@ -1,29 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
 import { Wallet } from 'ethers'
 import { utils } from 'js-waku'
 import { verifyTypedData } from '@ethersproject/wallet'
 import { getAddress } from '@ethersproject/address'
 import { DecoderV0, EncoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
+import pDefer from 'p-defer'
 
 // Types
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
 import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { BigNumber, Signer } from 'ethers'
+import type { WithPayload } from '../lib/types'
 
 // Protos
-import { ItemReply } from '../../../protos/item-reply'
-import { KeyExchange } from '../../../protos/key-exchange'
+import { ItemReply } from '../protos/item-reply'
+import { KeyExchange } from '../protos/key-exchange'
 
 // Hooks
-import {
-	useWakuFilter,
-	useWakuStoreQuery,
-	WithPayload,
-	wrapFilterCallback,
-} from '../../../services/waku'
-
-// Services
-import { getKeyExchange } from '../../../services/chat'
+import { decodeStore, DecodeStoreCallback, subscribeToLatestTopicData } from '../lib/waku'
 
 export type CreateReply = {
 	text: string
@@ -71,6 +64,7 @@ export const createReply = async (
 	marketplace: string,
 	item: BigNumber,
 	{ text }: CreateReply,
+	keyExchange: KeyExchange,
 	signer: Signer,
 ) => {
 	// Get signer
@@ -79,9 +73,6 @@ export const createReply = async (
 	if (!(signer instanceof Wallet)) {
 		throw new Error('not implemented yet')
 	}
-
-	// Generate chat keys
-	const keyExchange = await getKeyExchange(marketplace, item.toBigInt())
 
 	// Data to sign and in the Waku message
 	const data = { from, marketplace, item: item.toBigInt(), text, keyExchange }
@@ -138,32 +129,26 @@ const decodeWakuReply = async (
 	}
 }
 
-export const useItemReplies = (marketplace: string, item: bigint) => {
-	const [replies, setReplies] = useState<ItemReplyClean[]>([])
-	const [lastUpdate, setLastUpdate] = useState(Date.now())
+type ItemReplyRes = DecodeStoreCallback<ItemReplyClean, MessageV0>
 
+export const subscribeToItemReplies = async (
+	waku: WakuLight,
+	marketplace: string,
+	item: bigint,
+	callback: (response?: ItemReplyRes) => void,
+	watch = true,
+) => {
 	const topic = getItemTopic(marketplace, item.toString())
-	const decoders = useMemo(() => [new DecoderV0(topic)], [topic])
+	const decoders = [new DecoderV0(topic)]
+	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeWakuReply, callback), {}, watch)
+}
 
-	const callback = async (msg: Promise<MessageV0 | undefined>) => {
-		const message = await msg
-		if (!message?.payload) {
-			return
-		}
-
-		const decoded = await decodeWakuReply(message as WithPayload<MessageV0>)
-		if (!decoded) {
-			return
-		}
-
-		setReplies((replies) => [...replies, decoded])
-		setLastUpdate(Date.now())
-	}
-
-	const state = useWakuStoreQuery(decoders, callback, [topic])
-	useWakuFilter(decoders, wrapFilterCallback(callback), [topic])
-
-	useEffect(() => (state.loading ? setReplies([]) : undefined), [state.loading])
-
-	return { ...state, lastUpdate, replies }
+export const getItemReplies = async (
+	waku: WakuLight,
+	marketplace: string,
+	item: bigint,
+): Promise<ItemReplyRes> => {
+	const defer = pDefer<ItemReplyRes>()
+	await subscribeToItemReplies(waku, marketplace, item, defer.resolve, false)
+	return defer.promise
 }

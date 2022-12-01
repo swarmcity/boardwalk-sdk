@@ -81,7 +81,7 @@ export const wrapFilterCallback = <Msg extends Message>(
 export type DecodeStoreCallback<Data, Msg extends Message> = { data: Data; message: Msg }
 
 export const decodeStore = <Data, Msg extends Message>(
-	decodeMessage: (message: WithPayload<Msg>) => Data | false,
+	decodeMessage: (message: WithPayload<Msg>) => Data | false | Promise<Data | false>,
 	callback: (result?: DecodeStoreCallback<Data, Msg>) => void,
 ) => {
 	return async (msg: Promise<Msg | undefined> | undefined) => {
@@ -95,7 +95,7 @@ export const decodeStore = <Data, Msg extends Message>(
 			return false
 		}
 
-		const data = decodeMessage(message)
+		const data = await decodeMessage(message)
 		if (data) {
 			callback({ data, message })
 			return true
