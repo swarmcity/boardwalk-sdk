@@ -1,5 +1,4 @@
 import { BytesLike, ethers } from 'ethers'
-import { DeferredPromise } from 'p-defer'
 import { Buffer } from 'node:buffer'
 
 export function getHash(buffer: BytesLike): string {
@@ -43,12 +42,6 @@ export async function blobArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
 		fr.onload = () => resolve(fr.result as ArrayBuffer)
 		fr.readAsArrayBuffer(blob)
 	})
-}
-
-export const throwIfFasly = <Data>(defer: DeferredPromise<Data>, error?: string) => {
-	return (result?: Data) => {
-		result ? defer.resolve(result) : defer.reject(new Error(error))
-	}
 }
 
 export const nativeDataUriToBlob = (dataUri: string): Blob => {

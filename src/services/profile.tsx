@@ -11,7 +11,7 @@ import type { WithPayload } from '../lib/types'
 import { Profile } from '../protos/profile'
 
 // Lib
-import { throwIfFasly } from '../lib/utils'
+import { throwIfFasly } from '../lib/tools'
 import {
 	subscribeToLatestTopicData,
 	postWakuMessage,

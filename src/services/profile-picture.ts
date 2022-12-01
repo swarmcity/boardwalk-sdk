@@ -2,13 +2,14 @@ import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import pDefer from 'p-defer'
 
 // Lib
-import { blobArrayBuffer, getHash, isBlob, throwIfFasly } from '../lib/utils'
+import { blobArrayBuffer, getHash, isBlob } from '../lib/utils'
 import {
 	subscribeToLatestTopicData,
 	postWakuMessage,
 	decodeStore,
 	DecodeStoreCallback,
 } from '../lib/waku'
+import { throwIfFasly } from '../lib/tools'
 
 // Protos
 import { ProfilePicture } from '../protos/profile-picture'

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { expect, test } from 'vitest'
 
-import { getHash } from '../src/lib/utils'
+import { getHash } from '../src/lib/blob'
 
 test('should correctly hash binary data', async () => {
 	const filePng = readFileSync('./test/data/avatar.png')

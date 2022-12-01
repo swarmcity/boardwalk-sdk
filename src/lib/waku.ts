@@ -40,6 +40,12 @@ export const postWakuMessage = async (waku: WakuLight, topic: string, payload: U
 	return message
 }
 
+export const wrapFilterCallback = <Msg extends Message>(
+	callback: (message: Promise<Msg | undefined>) => Promise<unknown>,
+) => {
+	return (message: Msg) => void callback(Promise.resolve(message))
+}
+
 export const subscribeToLatestTopicData = <Msg extends Message>(
 	waku: WakuLight,
 	decoders: Decoder<Msg>[],
@@ -70,12 +76,6 @@ export const subscribeToLatestTopicData = <Msg extends Message>(
 			unsubscribe: waku.filter.subscribe(decoders, wrapFilterCallback(callback), options),
 		}
 	}
-}
-
-export const wrapFilterCallback = <Msg extends Message>(
-	callback: (message: Promise<Msg | undefined>) => Promise<unknown>,
-) => {
-	return (message: Msg) => void callback(Promise.resolve(message))
 }
 
 export type DecodeStoreCallback<Data, Msg extends Message> = { data: Data; message: Msg }
