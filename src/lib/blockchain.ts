@@ -10,7 +10,6 @@ export const shouldUpdate = (current: UpdateTime, last?: UpdateTime) => {
 
 	return (
 		current.blockNumber > last.blockNumber ||
-		(current.blockNumber === last.blockNumber &&
-			current.transactionIndex > last.transactionIndex)
+		(current.blockNumber === last.blockNumber && current.transactionIndex > last.transactionIndex)
 	)
 }
