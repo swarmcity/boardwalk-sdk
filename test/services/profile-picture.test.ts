@@ -12,7 +12,6 @@ describe('create and retrieve profile picture', () => {
 		const imgUint8Array = new Uint8Array(file.buffer)
 
 		const uploadRes = await createProfilePicture(waku, imgUint8Array, 'image/png')
-
 		const retrieveRes = await getProfilePicture(waku, uploadRes.hash)
 
 		expect(uploadRes.hash).toBe(
@@ -28,7 +27,6 @@ describe('create and retrieve profile picture', () => {
 		const imgUint8Array = new Uint8Array(file.buffer)
 
 		const uploadRes = await createProfilePicture(waku, imgUint8Array, 'image/png')
-
 		const retrieveRes = await getProfilePicture(waku, uploadRes.hash)
 
 		expect(uploadRes.hash).toBe(

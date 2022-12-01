@@ -1,8 +1,7 @@
-import { execSync } from 'child_process'
 import { JsonRpcProvider } from '@ethersproject/providers'
-import { Contract, Wallet } from 'ethers'
+import { Wallet } from 'ethers'
 import { writeFile } from 'fs/promises'
-import { getERC20, getMarketplaceFactory, getMarketplaceList } from '../src/index'
+import { deployERC20, deployMarketplaceFactory, deployMarketplaceList } from './utils/deploy'
 
 const OUT_FILE = './test/test-addresses.json'
 const PRIVATE_KEYS = [
@@ -20,49 +19,6 @@ const PRIVATE_KEYS = [
 
 const provider = new JsonRpcProvider('http://127.0.0.1:8545')
 const deployer = new Wallet(PRIVATE_KEYS[0], provider)
-
-const contracts_dir = './lib/boardwalk-contracts'
-
-// ERC20 token
-async function deployERC20(
-	deployer: Wallet,
-	decimals: number,
-	name: string,
-	symbol: string,
-): Promise<Contract> {
-	console.log(`${name} token: deploying`)
-	const address = execSync(
-		`cd ${contracts_dir} && forge create --mnemonic ./mnemonic MintableERC20 --constructor-args ${decimals} | grep 'Deployed to: ' | sed 's/Deployed to: //g'`,
-		{ encoding: 'utf-8' },
-	).trim()
-	console.log(`${name} token: deployed to ${address}`)
-	const erc20 = getERC20(address, deployer)
-	await erc20.init(name, symbol, deployer.address)
-	console.log(`${name} token: initialized with ${name} ${symbol}`)
-	return erc20
-}
-
-async function deployMarketplaceFactory(deployer: Wallet): Promise<Contract> {
-	console.log(`MarketplaceFactory: deploying`)
-	const address = execSync(
-		`cd ${contracts_dir} && forge create --mnemonic ./mnemonic MarketplaceFactory | grep 'Deployed to: ' | sed 's/Deployed to: //g'`,
-		{ encoding: 'utf-8' },
-	).trim()
-	console.log(`MarketplaceFactory: deployed to ${address}`)
-	const marketplaceFactory = getMarketplaceFactory(address, deployer)
-	return marketplaceFactory
-}
-
-async function deployMarketplaceList(deployer: Wallet): Promise<Contract> {
-	console.log(`MarketplaceList: deploying`)
-	const address = execSync(
-		`cd ${contracts_dir} && forge create --mnemonic ./mnemonic MarketplaceList | grep 'Deployed to: ' | sed 's/Deployed to: //g'`,
-		{ encoding: 'utf-8' },
-	).trim()
-	console.log(`MarketplaceList: deployed to ${address}`)
-	const marketplaceList = getMarketplaceList(address, deployer)
-	return marketplaceList
-}
 
 export default async function testsSetup(): Promise<void> {
 	const erc20 = await deployERC20(deployer, 18, 'testDAI', 'tDAI')
