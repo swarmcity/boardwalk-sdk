@@ -2,7 +2,7 @@ import { DecoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import pDefer from 'p-defer'
 
 // Lib
-import { fileArrayBuffer, getHash, isFile, throwIfFasly } from '../lib/utils'
+import { blobArrayBuffer, getHash, isBlob, throwIfFasly } from '../lib/utils'
 import {
 	subscribeToLatestTopicData,
 	postWakuMessage,
@@ -21,31 +21,38 @@ export const getProfilePictureTopic = (hash: string) => {
 	return `/swarmcity/1/profile-picture-${hash}/proto`
 }
 
-export const createProfilePicture = async (
+export const createProfilePicture = async <Data extends Uint8Array | Blob>(
 	waku: WakuLight,
-	data: Uint8Array | File,
-	type?: string,
+	data: Data,
+	type?: Data extends Uint8Array ? string : never,
 ): Promise<{
 	hash: string
 	message: { payload: Uint8Array }
 }> => {
 	let buffer: Uint8Array
-	const tp: string | undefined = type
-	if (isFile(data)) {
-		buffer = new Uint8Array(await fileArrayBuffer(data))
-		type = type ?? data.type
+	let tp: string | undefined = type
+
+	if (isBlob(data)) {
+		buffer = new Uint8Array(await blobArrayBuffer(data))
+		tp = data.type
 	} else {
 		buffer = data
 	}
+
+	if (!tp) {
+		throw new Error('unknown image type')
+	}
+
 	const hash = getHash(buffer)
 	const message = await postWakuMessage(
 		waku,
 		getProfilePictureTopic(hash),
 		ProfilePicture.encode({
 			data: buffer,
-			type: tp ?? 'unknown',
+			type: tp,
 		}),
 	)
+
 	return { hash, message }
 }
 
