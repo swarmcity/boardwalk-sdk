@@ -2,8 +2,8 @@ import { readFileSync } from 'fs'
 import { Protocols } from 'js-waku'
 import { describe, expect, test } from 'vitest'
 
-import { createProfilePicture, getProfilePicture } from '../src/services/profile-picture'
-import { getWaku } from '../src/lib/waku'
+import { createProfilePicture, getProfilePicture } from '../../src/services/profile-picture'
+import { getWaku } from '../../src/lib/waku'
 
 describe('create and retrieve profile picture', () => {
 	test('upload and retrieve PNG picture', async () => {
