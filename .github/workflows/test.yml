@@ -22,29 +22,29 @@ jobs:
         with:
           submodules: recursive
 
-      - name: 'Start nim waku'
-        run: npm run waku:start
-
       - name: Use Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v3
         with:
           cache: npm
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Install npm deps
+        run: npm ci
+
+      - name: Run linting test
+        run: npm run lint
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly
 
+      - name: 'Start nim waku'
+        run: npm run waku:start
+
       - name: Start blockchain
         run: npm run blockchain:start &
-
-      - name: Install npm deps
-        run: npm ci
 
       - name: Run tests
         run: |
           npm run test
-
-      - name: Run linting test
-        run: npm run lint
