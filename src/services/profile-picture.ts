@@ -77,7 +77,7 @@ export const subscribeToProfilePicture = async (
 	}
 
 	const decoders = [new DecoderV0(getProfilePictureTopic(hash))]
-	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback), {}, watch)
+	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback, true), {}, watch)
 }
 
 export const getProfilePicture = async (

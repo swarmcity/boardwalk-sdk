@@ -83,11 +83,12 @@ export type DecodeStoreCallback<Data, Msg extends Message> = { data: Data; messa
 export const decodeStore = <Data, Msg extends Message>(
 	decodeMessage: (message: WithPayload<Msg>) => Data | false | Promise<Data | false>,
 	callback: (result?: DecodeStoreCallback<Data, Msg>) => void,
+	onlyGetLast = false,
 ) => {
 	return async (msg: Promise<Msg | undefined> | undefined) => {
 		if (!msg) {
 			callback()
-			return true
+			return onlyGetLast
 		}
 
 		const message = (await msg) as WithPayload<Msg>
@@ -98,7 +99,7 @@ export const decodeStore = <Data, Msg extends Message>(
 		const data = await decodeMessage(message)
 		if (data) {
 			callback({ data, message })
-			return true
+			return onlyGetLast
 		}
 
 		return false

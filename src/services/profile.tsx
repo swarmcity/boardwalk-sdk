@@ -86,7 +86,7 @@ export const subscribeToProfile = async (
 	watch = true,
 ) => {
 	const decoders = [new DecoderV0(getProfileTopic(address))]
-	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback), {}, watch)
+	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback, true), {}, watch)
 }
 
 export const getProfile = async (waku: WakuLight, address: string): Promise<ProfileRes> => {

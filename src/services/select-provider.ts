@@ -180,7 +180,7 @@ export const subscribeToSelectProvider = async (
 	watch = true,
 ) => {
 	const decoders = [new DecoderV0(getSelectProviderTopic(marketplace, itemId))]
-	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback), {}, watch)
+	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback, true), {}, watch)
 }
 
 export const getSelectProvider = async (
