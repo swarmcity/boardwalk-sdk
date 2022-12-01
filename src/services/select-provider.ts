@@ -26,9 +26,6 @@ import {
 	verifyPayload,
 } from '../lib/eip-712'
 
-// Services
-import { getKeyExchange, setTheirTempChatKeys } from './chat'
-
 type Marketplace = {
 	address: string
 	name: string
@@ -98,7 +95,7 @@ export const createSelectProvider = async (
 	waku: WakuLight,
 	signer: Signer,
 	data: CreateSelectProvider,
-	theirKeyExchange: KeyExchange,
+	keyExchange: KeyExchange,
 ) => {
 	const topic = getSelectProviderTopic(data.marketplace.address, data.item)
 
@@ -126,15 +123,12 @@ export const createSelectProvider = async (
 		signer,
 	)
 
-	const keyExchange = await getKeyExchange(data.marketplace.address, data.item)
 	const payload = await createSignedPayload(
 		selectProviderEip712Config,
 		() => ({ keyExchange }),
 		() => ({ keyExchange }),
 		signer,
 	)
-
-	await setTheirTempChatKeys(data.marketplace.address, data.item, data.provider, theirKeyExchange)
 
 	return postWakuMessage(waku, topic, SelectProvider.encode({ ...payload, permitProvider }))
 }
