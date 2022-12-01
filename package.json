@@ -36,15 +36,15 @@
 		"@jest/types": "^29.3.1",
 		"@typechain/ethers-v5": "^10.1.1",
 		"@types/node": "^18.11.10",
-		"@typescript-eslint/eslint-plugin": "^5.44.0",
+		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-import": "^2.26.0",
 		"eslint-plugin-prettier": "^4.2.1",
-		"eslint-plugin-unicorn": "^45.0.0",
+		"eslint-plugin-unicorn": "^45.0.1",
 		"ethers": "*",
 		"p-defer": "^4.0.0",
-		"prettier": "^2.7.1",
+		"prettier": "^2.8.0",
 		"protons": "^5.1.0",
 		"rimraf": "^3.0.2",
 		"typechain": "^8.1.1",
@@ -56,8 +56,6 @@
 	},
 	"dependencies": {
 		"@multiformats/multiaddr": "11.0.7",
-		"bigint-conversion": "^2.3.0",
-		"js-waku": "0.30.0",
-		"noble-secp256k1": "^1.2.14"
+		"js-waku": "0.30.0"
 	}
 }
