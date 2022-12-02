@@ -1,4 +1,6 @@
-import { execSync } from 'child_process'
+import { exec as execOld } from 'node:child_process'
+import { promisify } from 'node:util'
+import { getAddress } from 'ethers/lib/utils'
 
 // Types
 import type { BigNumberish, Overrides, Wallet } from 'ethers'
@@ -10,21 +12,35 @@ import { getMarketplaceContract } from '../../src/services/marketplace'
 // ABIs
 import { factories } from '../../src/abi'
 
+// Promisify
+const exec = promisify(execOld)
+
 // Config
-const contracts_dir = './lib/boardwalk-contracts'
+const CONTRACTS_DIR = './lib/boardwalk-contracts'
 
 // Contract factories
 const getERC20 = factories.MintableERC20__factory.connect
 const getMarketplaceFactory = factories.MarketplaceFactory__factory.connect
 const getMarketplaceList = factories.MarketplaceList__factory.connect
 
-const deploy = (contract: string, args?: string): string => {
-	return execSync(
-		`cd ${contracts_dir} && forge create --mnemonic ./mnemonic ${contract} ${
-			args ? `--constructor-args ${args}` : ''
-		} | grep 'Deployed to: ' | sed 's/Deployed to: //g'`,
-		{ encoding: 'utf-8' },
-	).trim()
+const deploy = async (wallet: Wallet, contract: string, args?: string): Promise<string> => {
+	const command = ['forge create', '--root', CONTRACTS_DIR, '--private-key', wallet.privateKey]
+
+	if (args) {
+		command.push(...['--constructor-args', args])
+	}
+
+	command.push(contract)
+
+	const start = 'Deployed to: '
+	const { stdout } = await exec(command.join(' '), { encoding: 'utf-8' })
+	const deployed = stdout.split('\n').find((line) => line.startsWith(start))
+
+	if (!deployed) {
+		throw new Error('deployed address not found')
+	}
+
+	return getAddress(deployed.trim().substring(start.length))
 }
 
 export const deployERC20 = async (
@@ -33,19 +49,19 @@ export const deployERC20 = async (
 	name: string,
 	symbol: string,
 ): Promise<MintableERC20> => {
-	const address = deploy('MintableERC20', decimals.toString())
+	const address = await deploy(deployer, 'MintableERC20', decimals.toString())
 	const erc20 = getERC20(address, deployer)
 	await erc20.init(name, symbol, deployer.address)
 	return erc20
 }
 
 export const deployMarketplaceFactory = async (deployer: Wallet): Promise<MarketplaceFactory> => {
-	const address = deploy('MarketplaceFactory')
+	const address = await deploy(deployer, 'MarketplaceFactory')
 	return getMarketplaceFactory(address, deployer)
 }
 
 export const deployMarketplaceList = async (deployer: Wallet): Promise<MarketplaceList> => {
-	const address = deploy('MarketplaceList')
+	const address = await deploy(deployer, 'MarketplaceList')
 	return getMarketplaceList(address, deployer)
 }
 
