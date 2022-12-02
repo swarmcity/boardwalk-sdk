@@ -24,13 +24,16 @@ const getMarketplaceFactory = factories.MarketplaceFactory__factory.connect
 const getMarketplaceList = factories.MarketplaceList__factory.connect
 
 const deploy = async (wallet: Wallet, contract: string, args?: string): Promise<string> => {
-	const command = ['forge create', '--root', CONTRACTS_DIR, '--private-key', wallet.privateKey]
+	const command = [
+		'forge create',
+		'--root ' + CONTRACTS_DIR,
+		'--private-key ' + wallet.privateKey,
+		contract,
+	]
 
 	if (args) {
 		command.push(...['--constructor-args', args])
 	}
-
-	command.push(contract)
 
 	const start = 'Deployed to: '
 	const { stdout } = await exec(command.join(' '), { encoding: 'utf-8' })
