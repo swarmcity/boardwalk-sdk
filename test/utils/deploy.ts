@@ -5,6 +5,7 @@ import { getAddress } from 'ethers/lib/utils'
 // Types
 import type { BigNumberish, Overrides, Wallet } from 'ethers'
 import type { Marketplace, MarketplaceFactory, MarketplaceList, MintableERC20 } from '../../src/abi'
+import type { PromiseOrValue } from '../../src/abi/common'
 
 // Services
 import { getMarketplaceContract } from '../../src/services/marketplace'
@@ -75,14 +76,14 @@ export const deployMarketplace = async (
 	name: string,
 	fee: BigNumberish,
 	metadata: string,
-	overrides?: Overrides,
+	overrides?: Overrides & { from?: PromiseOrValue<string> },
 ): Promise<Marketplace> => {
 	const tx = await getMarketplaceFactory(factory, deployer).create(
 		token,
 		name,
 		fee,
 		metadata,
-		overrides,
+		overrides || {},
 	)
 	const { events } = await tx.wait()
 
