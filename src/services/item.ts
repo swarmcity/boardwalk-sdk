@@ -5,17 +5,12 @@ import type { Signer } from 'ethers'
 
 // Services
 import { getMarketplaceContract, getMarketplaceTokenContract } from './marketplace'
-import { setTheirChatKeys } from './chat'
-
-// Protos
-import { KeyExchange } from '../protos/key-exchange'
 
 export const fundItem = async (
 	signer: Signer,
 	marketplace: string,
 	item: bigint,
 	signature: Uint8Array,
-	keyExchange: KeyExchange,
 ) => {
 	const contract = getMarketplaceContract(marketplace, signer)
 	const token = await getMarketplaceTokenContract(marketplace, signer)
@@ -34,9 +29,6 @@ export const fundItem = async (
 	const { v, r, s } = splitSignature(signature)
 	const tx = await contract.fundItem(item, v, r, s)
 	await tx.wait()
-
-	// Set the keys of the item once we fund it
-	await setTheirChatKeys(marketplace, item, keyExchange)
 }
 
 export const cancelItem = async (signer: Signer, marketplace: string, item: bigint) => {
