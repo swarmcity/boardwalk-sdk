@@ -1,6 +1,6 @@
 import { DecoderV0, EncoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import { BigNumber, Event } from 'ethers'
-import { Interface } from 'ethers/lib/utils'
+import { arrayify, Interface, sha256 } from 'ethers/lib/utils'
 import { Log } from '@ethersproject/providers'
 
 // Types
@@ -14,7 +14,7 @@ import type { Provider } from '@ethersproject/providers'
 import { ItemMetadata } from '../protos/item-metadata'
 
 // Lib
-import { bufferToHex, numberToBigInt } from '../lib/tools'
+import { numberToBigInt } from '../lib/tools'
 import { shouldUpdate } from '../lib/blockchain'
 
 // Services
@@ -83,14 +83,14 @@ export const createItem = async (
 
 	// Create the metadata
 	const payload = ItemMetadata.encode({ description })
-	const hash = await crypto.subtle.digest('SHA-256', payload)
+	const hash = sha256(payload)
 
 	// Get the marketplace contract
-	const contract = getMarketplaceContract(marketplace, signer.provider)
+	const contract = getMarketplaceContract(marketplace, signer)
 
 	// Get token decimals
 	const tokenAddress = await contract.token()
-	const token = getERC20Contract(tokenAddress, signer.provider)
+	const token = getERC20Contract(tokenAddress, signer)
 	const decimals = await token.decimals()
 
 	// Post the metadata on Waku
@@ -107,7 +107,7 @@ export const createItem = async (
 	await approveTx.wait()
 
 	// Post the item on chain
-	const tx = await contract.newItem(amount, new Uint8Array(hash))
+	const tx = await contract.newItem(amount, arrayify(hash))
 	const { logs } = await tx.wait()
 
 	// Get the item ID
@@ -123,9 +123,8 @@ export const createItem = async (
 }
 
 const decodeWakuMessage = async (message: WithPayload<MessageV0>): Promise<WakuItem> => {
-	const hash = await crypto.subtle.digest('SHA-256', message.payload)
 	return {
-		hash: '0x' + bufferToHex(hash),
+		hash: sha256(message.payload),
 		metadata: ItemMetadata.decode(message.payload),
 	}
 }
