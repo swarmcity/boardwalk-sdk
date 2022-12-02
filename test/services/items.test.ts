@@ -74,5 +74,5 @@ describe('create and retrieve profile picture', async () => {
 				description: 'Test item',
 			},
 		})
-	})
+	}, 15_000)
 })
