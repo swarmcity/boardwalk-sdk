@@ -1,5 +1,11 @@
 import { execSync } from 'child_process'
-import { BigNumberish, Contract, Overrides, Wallet } from 'ethers'
+
+// Types
+import type { BigNumberish, Overrides, Wallet } from 'ethers'
+import type { Marketplace, MarketplaceFactory, MarketplaceList, MintableERC20 } from '../../src/abi'
+
+// Services
+import { getMarketplaceContract } from '../../src/services/marketplace'
 
 // ABIs
 import { factories } from '../../src/abi'
@@ -26,19 +32,19 @@ export const deployERC20 = async (
 	decimals: number,
 	name: string,
 	symbol: string,
-): Promise<Contract> => {
+): Promise<MintableERC20> => {
 	const address = deploy('MintableERC20', decimals.toString())
 	const erc20 = getERC20(address, deployer)
 	await erc20.init(name, symbol, deployer.address)
 	return erc20
 }
 
-export const deployMarketplaceFactory = async (deployer: Wallet): Promise<Contract> => {
+export const deployMarketplaceFactory = async (deployer: Wallet): Promise<MarketplaceFactory> => {
 	const address = deploy('MarketplaceFactory')
 	return getMarketplaceFactory(address, deployer)
 }
 
-export const deployMarketplaceList = async (deployer: Wallet): Promise<Contract> => {
+export const deployMarketplaceList = async (deployer: Wallet): Promise<MarketplaceList> => {
 	const address = deploy('MarketplaceList')
 	return getMarketplaceList(address, deployer)
 }
@@ -51,7 +57,7 @@ export const deployMarketplace = async (
 	fee: BigNumberish,
 	metadata: string,
 	overrides?: Overrides,
-): Promise<Contract> => {
+): Promise<Marketplace> => {
 	const tx = await getMarketplaceFactory(factory, deployer).create(
 		token,
 		name,
@@ -68,5 +74,5 @@ export const deployMarketplace = async (
 		throw new Error('no address found in the events')
 	}
 
-	return getMarketplaceList(address, deployer)
+	return getMarketplaceContract(address, deployer)
 }
