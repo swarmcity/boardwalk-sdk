@@ -2,4 +2,3 @@ node_modules
 dist
 src/abi
 /src/protos/*.ts
-/test/test-addresses.json

@@ -1,11 +1,16 @@
 import { execSync } from 'child_process'
 import { BigNumberish, Contract, Overrides, Wallet } from 'ethers'
 
-// Library
-import { getERC20, getMarketplaceFactory, getMarketplaceList } from '../../src/index'
+// ABIs
+import { factories } from '../../src/abi'
 
 // Config
 const contracts_dir = './lib/boardwalk-contracts'
+
+// Contract factories
+const getERC20 = factories.MintableERC20__factory.connect
+const getMarketplaceFactory = factories.MarketplaceFactory__factory.connect
+const getMarketplaceList = factories.MarketplaceList__factory.connect
 
 const deploy = (contract: string, args?: string): string => {
 	return execSync(

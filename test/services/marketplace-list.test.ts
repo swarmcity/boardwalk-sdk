@@ -79,6 +79,7 @@ describe('create and retrieve profile picture', () => {
 		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, wallet)
 
 		// Deploy marketplaces
+		console.time()
 		const nonce = await wallet.getTransactionCount()
 		const marketplaces = await Promise.all([
 			deployMarketplace(factory, wallet, getAddress(12), 'Test 1', 46, '', { nonce }),
