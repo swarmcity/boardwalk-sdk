@@ -1,5 +1,5 @@
 import { execSync } from 'child_process'
-import { Contract, Wallet } from 'ethers'
+import { BigNumberish, Contract, Overrides, Wallet } from 'ethers'
 
 // Library
 import { getERC20, getMarketplaceFactory, getMarketplaceList } from '../../src/index'
@@ -22,27 +22,46 @@ export const deployERC20 = async (
 	name: string,
 	symbol: string,
 ): Promise<Contract> => {
-	console.log(`${name} token: deploying`)
 	const address = deploy('MintableERC20', decimals.toString())
-	console.log(`${name} token: deployed to ${address}`)
-
 	const erc20 = getERC20(address, deployer)
 	await erc20.init(name, symbol, deployer.address)
-	console.log(`${name} token: initialized with ${name} ${symbol}`)
-
 	return erc20
 }
 
 export const deployMarketplaceFactory = async (deployer: Wallet): Promise<Contract> => {
-	console.log(`MarketplaceFactory: deploying`)
 	const address = deploy('MarketplaceFactory')
-	console.log(`MarketplaceFactory: deployed to ${address}`)
 	return getMarketplaceFactory(address, deployer)
 }
 
 export const deployMarketplaceList = async (deployer: Wallet): Promise<Contract> => {
-	console.log(`MarketplaceList: deploying`)
 	const address = deploy('MarketplaceList')
-	console.log(`MarketplaceList: deployed to ${address}`)
+	return getMarketplaceList(address, deployer)
+}
+
+export const deployMarketplace = async (
+	factory: string,
+	deployer: Wallet,
+	token: string,
+	name: string,
+	fee: BigNumberish,
+	metadata: string,
+	overrides?: Overrides,
+): Promise<Contract> => {
+	const tx = await getMarketplaceFactory(factory, deployer).create(
+		token,
+		name,
+		fee,
+		metadata,
+		overrides,
+	)
+	const { events } = await tx.wait()
+
+	const event = events?.find(({ event }) => event === 'MarketplaceCreated')
+	const address = event?.args?.addr
+
+	if (!address) {
+		throw new Error('no address found in the events')
+	}
+
 	return getMarketplaceList(address, deployer)
 }
