@@ -9,6 +9,7 @@ import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { UpdateTime } from '../lib/blockchain'
 import type { WithPayload } from '../lib/types'
 import type { Provider } from '@ethersproject/providers'
+import type { UnsubscribeFunction } from 'js-waku/lib/waku_filter'
 
 // Protos
 import { ItemMetadata } from '../protos/item-metadata'
@@ -16,6 +17,7 @@ import { ItemMetadata } from '../protos/item-metadata'
 // Lib
 import { numberToBigInt } from '../lib/tools'
 import { shouldUpdate } from '../lib/blockchain'
+import { wrapFilterCallback } from '../lib/waku'
 
 // Services
 import { getMarketplaceContract } from './marketplace'
@@ -32,17 +34,17 @@ export enum Status {
 	Cancelled,
 }
 
-type CreateItem = {
+export type CreateItem = {
 	price: number
 	description: string
 }
 
-type WakuItem = {
+export type WakuItem = {
 	hash: string
 	metadata: ItemMetadata
 }
 
-type ChainItem = {
+export type ChainItem = {
 	owner: string
 	id: BigNumber
 	metadata: string
@@ -129,12 +131,13 @@ const decodeWakuMessage = async (message: WithPayload<MessageV0>): Promise<WakuI
 	}
 }
 
-export const subscribeToWakuItems = (
+export const subscribeToWakuItems = async (
 	waku: WakuLight,
 	marketplace: string,
 	callback: (item: WakuItem) => void,
 	onError?: (error: string) => void,
 	onDone?: () => void,
+	watch = true,
 ) => {
 	let cancelled = false
 	const storeCallback = async (msg: Promise<MessageV0 | undefined>) => {
@@ -155,13 +158,20 @@ export const subscribeToWakuItems = (
 		callback(decoded)
 	}
 
+	const decoders = [new DecoderV0(getItemTopic(marketplace))]
 	waku.store
-		.queryCallbackOnPromise([new DecoderV0(getItemTopic(marketplace))], storeCallback)
+		.queryCallbackOnPromise(decoders, storeCallback)
 		.catch((error) => !cancelled && onError?.(error))
 		.finally(() => !cancelled && onDone?.())
 
-	return () => {
+	let unsubscribe: UnsubscribeFunction | undefined
+	if (watch) {
+		unsubscribe = await waku.filter.subscribe(decoders, wrapFilterCallback(storeCallback))
+	}
+
+	return async () => {
 		cancelled = true
+		await unsubscribe?.()
 	}
 }
 
@@ -330,7 +340,7 @@ export const subscribeToMarketplaceItems = (
 	}
 }
 
-export const subscribeToItems = (
+export const subscribeToItems = async (
 	waku: WakuLight,
 	provider: Provider,
 	wsProvider: Provider,
@@ -363,7 +373,7 @@ export const subscribeToItems = (
 	}
 
 	// Subscribe to waku and chain items
-	const wakuUnsubscribe = subscribeToWakuItems(
+	const wakuUnsubscribe = await subscribeToWakuItems(
 		waku,
 		marketplace,
 		(item: WakuItem) => {

@@ -3,13 +3,13 @@ import { Contract } from 'ethers'
 
 // Services
 import { getMarketplaceListContract, getMarketplaceList } from '../../src/services/marketplace-list'
-import { awaitTx, getAddress, getProvider, getWallet } from '../utils/ethers'
+import { awaitTx, generateWallet, getAddress, getProvider } from '../utils/ethers'
 
 // Utils
 import { deployMarketplace, deployMarketplaceFactory, deployMarketplaceList } from '../utils/deploy'
 
-describe('create and retrieve profile picture', () => {
-	const deployer = getWallet(0)
+describe('create and retrieve profile picture', async () => {
+	const deployer = await generateWallet()
 	const gasLimit = 100_000
 
 	let marketplaceFactoryContract: Contract
@@ -31,18 +31,16 @@ describe('create and retrieve profile picture', () => {
 
 	test('can fetch marketplaces', async () => {
 		const provider = getProvider()
-		const wallet = getWallet(0)
-
 		const factory = marketplaceFactoryContract.address
 		const marketplaceList = marketplaceListContract.address
-		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, wallet)
+		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, deployer)
 
 		// Deploy marketplaces
-		const nonce = await wallet.getTransactionCount()
+		const nonce = await deployer.getTransactionCount()
 		const marketplaces = await Promise.all([
-			deployMarketplace(factory, wallet, getAddress(12), 'Test 1', 46, '', { nonce }),
-			deployMarketplace(factory, wallet, getAddress(45), 'Test 2', 12, '', { nonce: nonce + 1 }),
-			deployMarketplace(factory, wallet, getAddress(78), 'Test 3', 79, '', { nonce: nonce + 2 }),
+			deployMarketplace(factory, deployer, getAddress(12), 'Test 1', 46, '', { nonce }),
+			deployMarketplace(factory, deployer, getAddress(45), 'Test 2', 12, '', { nonce: nonce + 1 }),
+			deployMarketplace(factory, deployer, getAddress(78), 'Test 3', 79, '', { nonce: nonce + 2 }),
 		])
 
 		// Add a few marketplaces to the list
@@ -72,19 +70,18 @@ describe('create and retrieve profile picture', () => {
 
 	test('can remove marketplaces', async () => {
 		const provider = getProvider()
-		const wallet = getWallet(0)
 
 		const factory = marketplaceFactoryContract.address
 		const marketplaceList = marketplaceListContract.address
-		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, wallet)
+		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, deployer)
 
 		// Deploy marketplaces
 		console.time()
-		const nonce = await wallet.getTransactionCount()
+		const nonce = await deployer.getTransactionCount()
 		const marketplaces = await Promise.all([
-			deployMarketplace(factory, wallet, getAddress(12), 'Test 1', 46, '', { nonce }),
-			deployMarketplace(factory, wallet, getAddress(45), 'Test 2', 12, '', { nonce: nonce + 1 }),
-			deployMarketplace(factory, wallet, getAddress(78), 'Test 3', 79, '', { nonce: nonce + 2 }),
+			deployMarketplace(factory, deployer, getAddress(12), 'Test 1', 46, '', { nonce }),
+			deployMarketplace(factory, deployer, getAddress(45), 'Test 2', 12, '', { nonce: nonce + 1 }),
+			deployMarketplace(factory, deployer, getAddress(78), 'Test 3', 79, '', { nonce: nonce + 2 }),
 		])
 
 		// Add a few marketplaces to the list
@@ -119,17 +116,16 @@ describe('create and retrieve profile picture', () => {
 
 	test('can remove a marketplace and add it back again', async () => {
 		const provider = getProvider()
-		const wallet = getWallet(0)
 
 		const factory = marketplaceFactoryContract.address
 		const marketplaceList = marketplaceListContract.address
-		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, wallet)
+		const marketplaceListAsOwner = getMarketplaceListContract(marketplaceList, deployer)
 
 		// Deploy marketplaces
-		const nonce = await wallet.getTransactionCount()
+		const nonce = await deployer.getTransactionCount()
 		const marketplaces = await Promise.all([
-			deployMarketplace(factory, wallet, getAddress(12), 'Test 1', 46, '', { nonce }),
-			deployMarketplace(factory, wallet, getAddress(45), 'Test 2', 12, '', { nonce: nonce + 1 }),
+			deployMarketplace(factory, deployer, getAddress(12), 'Test 1', 46, '', { nonce }),
+			deployMarketplace(factory, deployer, getAddress(45), 'Test 2', 12, '', { nonce: nonce + 1 }),
 		])
 
 		// Add a few marketplaces to the list

@@ -1,18 +1,17 @@
 import { describe, test, afterEach, expect } from 'vitest'
-import { getWaku } from '../../src/lib/waku'
 import { DecoderV0, EncoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import { Protocols } from 'js-waku'
 import pDefer from 'p-defer'
 
-type CleanUpFunction = () => Promise<void>
+// Utils
+import { cleanup, CleanUpFunction } from '../utils/cleanup'
+
+// Lib
+import { getWaku } from '../../src/lib/waku'
 
 describe('waku', () => {
-	let cleanupFns: CleanUpFunction[] = []
-
-	afterEach(async () => {
-		await Promise.all(cleanupFns.map((fn) => fn()))
-		cleanupFns = []
-	})
+	const cleanupFns: CleanUpFunction[] = []
+	afterEach(cleanup.bind(null, cleanupFns))
 
 	test('send and receive message over PubSub', async () => {
 		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])

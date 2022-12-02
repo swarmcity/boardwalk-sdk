@@ -1,22 +1,26 @@
-import { describe, expect, test, beforeEach } from 'vitest'
+import { describe, expect, test, beforeEach, afterEach } from 'vitest'
 import { Protocols } from 'js-waku'
+import pDefer from 'p-defer'
+
+// Utils
+import { generateWallet } from '../utils/ethers'
 
 // Services
-import { getWallet } from '../utils/ethers'
+import { createItem, subscribeToWakuItems, WakuItem } from '../../src/services/items'
 
 // Utils
 import { deployERC20, deployMarketplace, deployMarketplaceFactory } from '../utils/deploy'
+import { cleanup, CleanUpFunction } from '../utils/cleanup'
 
 // ABIs
 import { Marketplace } from '../../src/abi'
 
 // Lib
 import { getWaku } from '../../src/lib/waku'
-import { createItem } from '../../src/services/items'
 
-describe('create and retrieve profile picture', () => {
-	const deployer = getWallet(0)
-	const user = getWallet(1)
+describe('create and retrieve profile picture', async () => {
+	const deployer = await generateWallet()
+	const user = await generateWallet()
 
 	let marketplace: Marketplace
 
@@ -37,16 +41,38 @@ describe('create and retrieve profile picture', () => {
 		await erc20.mint(user.address, 10n ** 23n)
 	})
 
+	const cleanupFns: CleanUpFunction[] = []
+	afterEach(cleanup.bind(null, cleanupFns))
+
 	test('item creation on-chain transaction succeeds', async () => {
 		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
-		const wallet = getWallet(1)
-
 		const id = await createItem(
 			waku,
 			marketplace.address,
 			{ price: 123, description: 'Test item' },
-			wallet,
+			user,
 		)
 		expect(id).toEqual(1n)
+	}, 10_000)
+
+	test('item creation pushes an event to Waku', async () => {
+		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
+		const deferred = pDefer<WakuItem>()
+
+		// Subscribe to Waku items
+		const unsubscribe = await subscribeToWakuItems(waku, marketplace.address, deferred.resolve)
+		cleanupFns.push(unsubscribe)
+
+		// Create the item
+		await createItem(waku, marketplace.address, { price: 123, description: 'Test item' }, user)
+
+		// Wait for the callback to resolve
+		const item = await deferred.promise
+		expect(item).toEqual({
+			hash: '0x2d1dd148d3aa0bebf9ba0ad804cabab7fe0c78a435c084e51fc460694d3a7115',
+			metadata: {
+				description: 'Test item',
+			},
+		})
 	})
 })
