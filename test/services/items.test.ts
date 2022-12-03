@@ -55,9 +55,9 @@ describe('create and retrieve profile picture', async () => {
 		expect(id).toEqual(1n)
 	}, 10_000)
 
-	test('item creation pushes an event to Waku', async () => {
+	test('item creation pushes a stored event to Waku', async () => {
 		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
-		const deferred = pDefer<WakuItem>()
+		let deferred = pDefer<WakuItem>()
 
 		// Subscribe to Waku items
 		const unsubscribe = await subscribeToWakuItems(waku, marketplace.address, deferred.resolve)
@@ -66,13 +66,30 @@ describe('create and retrieve profile picture', async () => {
 		// Create the item
 		await createItem(waku, marketplace.address, { price: 123, description: 'Test item' }, user)
 
-		// Wait for the callback to resolve
-		const item = await deferred.promise
-		expect(item).toEqual({
+		// Expected item
+		const expected = {
 			hash: '0x2d1dd148d3aa0bebf9ba0ad804cabab7fe0c78a435c084e51fc460694d3a7115',
 			metadata: {
 				description: 'Test item',
 			},
-		})
+		}
+
+		// Wait for the callback to resolve
+		let item = await deferred.promise
+		expect(item).toEqual(expected)
+
+		// Re-run the query to fetch from the store
+		deferred = pDefer<WakuItem>()
+		await subscribeToWakuItems(
+			waku,
+			marketplace.address,
+			deferred.resolve,
+			undefined,
+			undefined,
+			false,
+		)
+
+		item = await deferred.promise
+		expect(item).toEqual(expected)
 	}, 15_000)
 })
