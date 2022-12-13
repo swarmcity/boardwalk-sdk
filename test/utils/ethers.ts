@@ -1,8 +1,12 @@
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import { StaticJsonRpcProvider, WebSocketProvider } from '@ethersproject/providers'
 import { ContractTransaction, Wallet } from 'ethers'
 
 export const getProvider = () => {
 	return new StaticJsonRpcProvider('http://127.0.0.1:8545')
+}
+
+export const getWsProvider = () => {
+	return new WebSocketProvider('ws://127.0.0.1:8545')
 }
 
 export const awaitTx = async (tx: Promise<ContractTransaction>) => {
