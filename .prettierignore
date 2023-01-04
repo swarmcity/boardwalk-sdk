@@ -4,3 +4,4 @@
 /test/test-addresses.json
 package-lock.json
 /src/protos/*.ts
+/coverage

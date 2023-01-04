@@ -140,7 +140,13 @@ export const subscribeToItemReplies = async (
 ) => {
 	const topic = getItemTopic(marketplace, item.toString())
 	const decoders = [new DecoderV0(topic)]
-	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeWakuReply, callback), {}, watch)
+	return subscribeToLatestTopicData(
+		waku,
+		decoders,
+		decodeStore(decodeWakuReply, callback),
+		{},
+		watch,
+	)
 }
 
 export const getItemReplies = async (

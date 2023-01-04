@@ -173,7 +173,7 @@ const decodeMessage = (message: WithPayload<MessageV0>): SelectProvider | false 
 	return verify ? selectProvider : false
 }
 
-type SelectProviderResult = DecodeStoreCallback<SelectProvider, MessageV0>
+export type SelectProviderResult = DecodeStoreCallback<SelectProvider, MessageV0>
 
 export const subscribeToSelectProvider = async (
 	waku: WakuLight,
@@ -183,7 +183,13 @@ export const subscribeToSelectProvider = async (
 	watch = true,
 ) => {
 	const decoders = [new DecoderV0(getSelectProviderTopic(marketplace, itemId))]
-	subscribeToLatestTopicData(waku, decoders, decodeStore(decodeMessage, callback, true), {}, watch)
+	return subscribeToLatestTopicData(
+		waku,
+		decoders,
+		decodeStore(decodeMessage, callback, true),
+		{},
+		watch,
+	)
 }
 
 export const getSelectProvider = async (

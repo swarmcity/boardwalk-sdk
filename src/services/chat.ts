@@ -98,7 +98,7 @@ export const subscribeToChatMessages = async (
 ) => {
 	const topic = getChatMessageTopic(marketplace, item)
 	const decoders = [new SymDecoder(topic, keys.symmetric)]
-	subscribeToLatestTopicData(
+	return subscribeToLatestTopicData(
 		waku,
 		decoders,
 		decodeStore(decodeWakuMessage.bind(null, keys.signing), callback),
