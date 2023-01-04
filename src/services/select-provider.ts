@@ -123,9 +123,7 @@ export const createSelectProvider = async (
 	data: CreateSelectProvider,
 	keyExchange: KeyExchange,
 ) => {
-	const topic = getSelectProviderTopic(data.marketplace.address, data.item)
 	const permitProvider = await createPermitProvider(data, signer)
-
 	const payload = await createSignedPayload(
 		selectProviderEip712Config,
 		() => ({ keyExchange }),
@@ -133,6 +131,7 @@ export const createSelectProvider = async (
 		signer,
 	)
 
+	const topic = getSelectProviderTopic(data.marketplace.address, data.item)
 	return postWakuMessage(waku, topic, SelectProvider.encode({ ...payload, permitProvider }))
 }
 

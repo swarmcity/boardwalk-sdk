@@ -1,10 +1,13 @@
 import { afterEach, describe, expect, test } from 'vitest'
 import { constants } from 'ethers'
+import { randomBytes } from 'node:crypto'
+import { arrayify } from 'ethers/lib/utils'
 
 // Services
 import {
 	createSelectProvider,
 	formatPermitProviderEIP712Config,
+	getSelectProvider,
 	getSelectProviderTopic,
 	SelectProviderResult,
 	subscribeToSelectProvider,
@@ -18,7 +21,6 @@ import { generateWallet } from '../utils/ethers'
 import { generateKeyPair, randomBigInt } from '../utils/crypto'
 import { pEvent } from '../utils/p-event'
 import { cleanup, CleanUpFunction } from '../utils/cleanup'
-import { randomBytes } from 'node:crypto'
 
 // NOTE: `createPermitProvider` tested in `marketplace.test.ts`
 describe('create and retrieve profile picture', async () => {
@@ -95,8 +97,58 @@ describe('create and retrieve profile picture', async () => {
 			{ sigPubKey, ecdhPubKey },
 		)
 
+		// Expected result
+		const expected = {
+			permitProvider: {
+				marketplace: {
+					address: arrayify(address),
+					name: 'Marketplace',
+					chainId: 1337n,
+				},
+				seeker: arrayify(seeker.address),
+				provider: arrayify(provider.address),
+				item,
+			},
+			keyExchange: {
+				sigPubKey,
+				ecdhPubKey,
+			},
+		}
+
 		// Except an update on the event
-		//console.log(await callback.next())
-		//console.log(await getSelectProvider(waku, address, item))
+		let selectProvider = await callback.next()
+		expect(selectProvider?.data).toMatchObject(expected)
+
+		// Expect the store query to be identical to the event
+		selectProvider = await getSelectProvider(waku, address, item)
+		expect(selectProvider?.data).toMatchObject(expected)
+
+		// Choose a new provider
+		const newProvider = await generateWallet()
+		await createSelectProvider(
+			waku,
+			seeker,
+			{
+				marketplace: {
+					address,
+					chainId: 1337n,
+					name: 'Marketplace',
+				},
+				provider: newProvider.address,
+				item,
+			},
+			{ sigPubKey, ecdhPubKey },
+		)
+
+		// Make sure the event was called again
+		expected.permitProvider.provider = arrayify(newProvider.address)
+
+		// Except an update on the event
+		selectProvider = await callback.next()
+		expect(selectProvider?.data).toMatchObject(expected)
+
+		// Expect the store query to be identical to the event
+		selectProvider = await getSelectProvider(waku, address, item)
+		expect(selectProvider?.data).toMatchObject(expected)
 	}, 15_000)
 })

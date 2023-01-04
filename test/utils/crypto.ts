@@ -8,6 +8,6 @@ export const generateKeyPair = () => {
 	return { publicKey, privateKey }
 }
 
-export const randomBigInt = (bytes = 16) => {
+export const randomBigInt = (bytes = 8) => {
 	return BigInt('0x' + randomBytes(bytes).toString('hex'))
 }
