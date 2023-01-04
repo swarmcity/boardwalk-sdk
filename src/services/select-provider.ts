@@ -91,14 +91,7 @@ const toArray = <Condition extends boolean>(
 	return (condition ? arrayify(string) : string) as any
 }
 
-export const createSelectProvider = async (
-	waku: WakuLight,
-	signer: Signer,
-	data: CreateSelectProvider,
-	keyExchange: KeyExchange,
-) => {
-	const topic = getSelectProviderTopic(data.marketplace.address, data.item)
-
+export const createPermitProvider = async (data: CreateSelectProvider, signer: Signer) => {
 	const formatMarketplace = <Condition extends boolean>(array: Condition) => ({
 		...data.marketplace,
 		address: toArray(array, data.marketplace.address),
@@ -116,12 +109,22 @@ export const createSelectProvider = async (
 		item: BigInt(data.item),
 	})
 
-	const permitProvider = await createSignedPayload(
+	return await createSignedPayload(
 		formatPermitProviderEIP712Config(data.marketplace),
 		(signer: Uint8Array) => formatData(true, signer),
 		(signer: string) => formatData(false, signer),
 		signer,
 	)
+}
+
+export const createSelectProvider = async (
+	waku: WakuLight,
+	signer: Signer,
+	data: CreateSelectProvider,
+	keyExchange: KeyExchange,
+) => {
+	const topic = getSelectProviderTopic(data.marketplace.address, data.item)
+	const permitProvider = await createPermitProvider(data, signer)
 
 	const payload = await createSignedPayload(
 		selectProviderEip712Config,

@@ -11,7 +11,7 @@ import type { FundItemEvent, ItemStatusChangeEvent } from '../abi/Marketplace'
 import { cleanOutput, getProvider } from '../lib/ethers'
 
 // Services
-import type { Status } from './items'
+import { Status } from './items'
 import { getReputation } from './reputation'
 import { getERC20Contract } from './erc20'
 
@@ -95,6 +95,10 @@ export const getMarketplaceItem = async (
 	const contract = getMarketplaceContract(marketplace, wsProvider)
 	const item: MarketplaceItem = cleanOutput(await contract.items(itemId))
 
+	if (!item.status) {
+		throw new Error('item not found')
+	}
+
 	const statusFilter = contract.filters.ItemStatusChange(itemId)
 	const statusListener = (_: BigNumberish, status: Status) => {
 		item.status = status
@@ -106,10 +110,9 @@ export const getMarketplaceItem = async (
 		// TODO: Fetch `providerRep`
 		item.providerAddress = providerAddress
 		item.providerRep = 0n
+		item.status = Status.Funded
 		callback && callback(item)
 	}
-
-	contract.on<ItemStatusChangeEvent>(statusFilter, statusListener)
 
 	if (callback) {
 		contract.on<ItemStatusChangeEvent>(statusFilter, statusListener)
