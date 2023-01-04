@@ -149,7 +149,8 @@ describe('create and retrieve profile picture', async () => {
 		)
 		cleanupFns.push(unsubscribe)
 
-		expect(item).toEqual({
+		// Expected
+		const expected = {
 			fee: 12345n,
 			metadata: hash,
 			price: 89012n,
@@ -158,7 +159,8 @@ describe('create and retrieve profile picture', async () => {
 			seekerAddress: seeker.address,
 			seekerRep: 0n,
 			status: Status.Open,
-		})
+		}
+		expect(item).toEqual(expected)
 
 		// Fund the item
 		const { signature } = await createPermitProvider(
@@ -183,28 +185,13 @@ describe('create and retrieve profile picture', async () => {
 		await callback.next()
 
 		// Expect funding event
-		expect(await callback.next()).toEqual({
-			fee: 12345n,
-			metadata: hash,
-			price: 89012n,
-			providerAddress: user.address,
-			providerRep: 0n,
-			seekerAddress: seeker.address,
-			seekerRep: 0n,
-			status: Status.Funded,
-		})
+		expected.status = Status.Funded
+		expected.providerAddress = user.address
+		expect(await callback.next()).toEqual(expected)
 
 		// Status change
 		await contract.payoutItem(1n)
-		expect(await callback.next()).toEqual({
-			fee: 12345n,
-			metadata: hash,
-			price: 89012n,
-			providerAddress: user.address,
-			providerRep: 0n,
-			seekerAddress: seeker.address,
-			seekerRep: 0n,
-			status: Status.Done,
-		})
+		expected.status = Status.Done
+		expect(await callback.next()).toEqual(expected)
 	})
 })
