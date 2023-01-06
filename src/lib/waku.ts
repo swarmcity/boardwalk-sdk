@@ -7,6 +7,7 @@ import { EncoderV0 } from 'js-waku/lib/waku_message/version_0'
 // Types
 import type { Decoder, Message, WakuLight } from 'js-waku/lib/interfaces'
 import type { QueryOptions } from 'js-waku/lib/waku_store'
+import type { UnsubscribeFunction } from 'js-waku/lib/waku_filter'
 import type { WithPayload } from './types'
 
 const defaultOptions: CreateOptions = {}
@@ -103,5 +104,49 @@ export const decodeStore = <Data, Msg extends Message>(
 		}
 
 		return false
+	}
+}
+
+export const subscribeToWakuTopic = async <Data, T extends Message>(
+	waku: WakuLight,
+	decoders: Decoder<T>[],
+	decodeMessage: (message: WithPayload<T>) => Promise<Data>,
+	callback: (item: Data) => void,
+	onError?: (error: string) => void,
+	onDone?: () => void,
+	watch = true,
+) => {
+	let cancelled = false
+	const storeCallback = async (msg: Promise<T | undefined>) => {
+		if (cancelled) {
+			return true
+		}
+
+		const message = await msg
+		if (!message?.payload) {
+			return
+		}
+
+		const decoded = await decodeMessage(message as WithPayload<T>)
+		if (!decoded) {
+			return
+		}
+
+		callback(decoded)
+	}
+
+	waku.store
+		.queryCallbackOnPromise(decoders, storeCallback)
+		.catch((error) => !cancelled && onError?.(error))
+		.finally(() => !cancelled && onDone?.())
+
+	let unsubscribe: UnsubscribeFunction | undefined
+	if (watch) {
+		unsubscribe = await waku.filter.subscribe(decoders, wrapFilterCallback(storeCallback))
+	}
+
+	return async () => {
+		cancelled = true
+		await unsubscribe?.()
 	}
 }

@@ -9,7 +9,6 @@ import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { UpdateTime } from '../lib/blockchain'
 import type { WithPayload } from '../lib/types'
 import type { Provider } from '@ethersproject/providers'
-import type { UnsubscribeFunction } from 'js-waku/lib/waku_filter'
 
 // Protos
 import { ItemMetadata } from '../protos/item-metadata'
@@ -17,7 +16,7 @@ import { ItemMetadata } from '../protos/item-metadata'
 // Lib
 import { numberToBigInt } from '../lib/tools'
 import { shouldUpdate } from '../lib/blockchain'
-import { wrapFilterCallback } from '../lib/waku'
+import { subscribeToWakuTopic } from '../lib/waku'
 
 // Services
 import { getMarketplaceContract } from './marketplace'
@@ -139,40 +138,15 @@ export const subscribeToWakuItems = async (
 	onDone?: () => void,
 	watch = true,
 ) => {
-	let cancelled = false
-	const storeCallback = async (msg: Promise<MessageV0 | undefined>) => {
-		if (cancelled) {
-			return true
-		}
-
-		const message = await msg
-		if (!message?.payload) {
-			return
-		}
-
-		const decoded = await decodeWakuMessage(message as WithPayload<MessageV0>)
-		if (!decoded) {
-			return
-		}
-
-		callback(decoded)
-	}
-
-	const decoders = [new DecoderV0(getItemTopic(marketplace))]
-	waku.store
-		.queryCallbackOnPromise(decoders, storeCallback)
-		.catch((error) => !cancelled && onError?.(error))
-		.finally(() => !cancelled && onDone?.())
-
-	let unsubscribe: UnsubscribeFunction | undefined
-	if (watch) {
-		unsubscribe = await waku.filter.subscribe(decoders, wrapFilterCallback(storeCallback))
-	}
-
-	return async () => {
-		cancelled = true
-		await unsubscribe?.()
-	}
+	return subscribeToWakuTopic(
+		waku,
+		[new DecoderV0(getItemTopic(marketplace))],
+		decodeWakuMessage,
+		callback,
+		onError,
+		onDone,
+		watch,
+	)
 }
 
 const decodeNewItemEvent = async (event: Event, iface: Interface): Promise<ChainItem> => {
