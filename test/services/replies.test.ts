@@ -26,7 +26,7 @@ const generateKeyExchange = () => ({
 	ecdhPubKey: generateKeyPair().publicKey,
 })
 
-describe('Should create a reply on an existing item', async () => {
+describe('replies', async () => {
 	const repliers = await Promise.all([generateWallet(), generateWallet(), generateWallet()])
 	const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
 

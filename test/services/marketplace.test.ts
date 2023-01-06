@@ -24,7 +24,7 @@ import {
 import { Status } from '../../src/services/items'
 import { createPermitProvider } from '../../src/services/select-provider'
 
-describe('create and retrieve profile picture', async () => {
+describe('marketplace', async () => {
 	const deployer = await generateWallet()
 	const seeker = await generateWallet()
 	const user = await generateWallet()

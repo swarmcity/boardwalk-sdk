@@ -23,7 +23,7 @@ import { pEvent } from '../utils/p-event'
 import { cleanup, CleanUpFunction } from '../utils/cleanup'
 
 // NOTE: `createPermitProvider` tested in `marketplace.test.ts`
-describe('create and retrieve profile picture', async () => {
+describe('select-provider', async () => {
 	const waku = await getWaku()
 	const provider = await generateWallet()
 	const seeker = await generateWallet()

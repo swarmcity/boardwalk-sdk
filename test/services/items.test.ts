@@ -26,7 +26,7 @@ import { Marketplace } from '../../src/abi'
 import { getWaku } from '../../src/lib/waku'
 import { BigNumber } from 'ethers'
 
-describe('create and retrieve profile picture', async () => {
+describe('items', async () => {
 	const deployer = await generateWallet()
 	const user = await generateWallet()
 

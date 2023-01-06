@@ -8,7 +8,7 @@ import { awaitTx, generateWallet, getAddress, getProvider } from '../utils/ether
 // Utils
 import { deployMarketplace, deployMarketplaceFactory, deployMarketplaceList } from '../utils/deploy'
 
-describe('create and retrieve profile picture', async () => {
+describe('marketplace-list', async () => {
 	const deployer = await generateWallet()
 	const gasLimit = 100_000
 

@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest'
 import { createProfilePicture, getProfilePicture } from '../../src/services/profile-picture'
 import { getWaku } from '../../src/lib/waku'
 
-describe('create and retrieve profile picture', () => {
+describe('profile-picture', () => {
 	test('upload and retrieve PNG picture', async () => {
 		const file = readFileSync('./test/data/avatar.png')
 		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
