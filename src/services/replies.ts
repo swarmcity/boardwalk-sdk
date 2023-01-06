@@ -8,15 +8,15 @@ import pDefer from 'p-defer'
 // Types
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
 import type { WakuLight } from 'js-waku/lib/interfaces'
-import type { BigNumber, Signer } from 'ethers'
+import type { Signer } from 'ethers'
 import type { WithPayload } from '../lib/types'
 
 // Protos
 import { ItemReply } from '../protos/item-reply'
 import { KeyExchange } from '../protos/key-exchange'
 
-// Hooks
-import { decodeStore, DecodeStoreCallback, subscribeToLatestTopicData } from '../lib/waku'
+// Lib
+import { subscribeToWakuTopic } from '../lib/waku'
 
 export type CreateReply = {
 	text: string
@@ -62,7 +62,7 @@ export const getItemTopic = (marketplace: string, item: string) => {
 export const createReply = async (
 	waku: WakuLight,
 	marketplace: string,
-	item: BigNumber,
+	item: bigint,
 	{ text }: CreateReply,
 	keyExchange: KeyExchange,
 	signer: Signer,
@@ -75,7 +75,7 @@ export const createReply = async (
 	}
 
 	// Data to sign and in the Waku message
-	const data = { from, marketplace, item: item.toBigInt(), text, keyExchange }
+	const data = { from, marketplace, item, text, keyExchange }
 
 	// Sign the message
 	const signatureHex = await signer._signTypedData(DOMAIN, TYPES, data)
@@ -129,32 +129,38 @@ const decodeWakuReply = async (
 	}
 }
 
-type ItemReplyRes = DecodeStoreCallback<ItemReplyClean, MessageV0>
-
 export const subscribeToItemReplies = async (
 	waku: WakuLight,
 	marketplace: string,
 	item: bigint,
-	callback: (response?: ItemReplyRes) => void,
+	callback: (response: ItemReplyClean) => void,
+	onError?: (error: string) => void,
+	onDone?: () => void,
 	watch = true,
 ) => {
 	const topic = getItemTopic(marketplace, item.toString())
 	const decoders = [new DecoderV0(topic)]
-	return subscribeToLatestTopicData(
-		waku,
-		decoders,
-		decodeStore(decodeWakuReply, callback),
-		{},
-		watch,
-	)
+	return subscribeToWakuTopic(waku, decoders, decodeWakuReply, callback, onError, onDone, watch)
 }
 
 export const getItemReplies = async (
 	waku: WakuLight,
 	marketplace: string,
 	item: bigint,
-): Promise<ItemReplyRes> => {
-	const defer = pDefer<ItemReplyRes>()
-	await subscribeToItemReplies(waku, marketplace, item, defer.resolve, false)
+): Promise<ItemReplyClean[]> => {
+	const items: ItemReplyClean[] = []
+	const defer = pDefer<ItemReplyClean[]>()
+	const collect = (item: ItemReplyClean) => void items.push(item)
+
+	await subscribeToItemReplies(
+		waku,
+		marketplace,
+		item,
+		collect,
+		defer.reject,
+		() => defer.resolve(items),
+		false,
+	)
+
 	return defer.promise
 }

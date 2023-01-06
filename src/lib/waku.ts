@@ -110,7 +110,7 @@ export const decodeStore = <Data, Msg extends Message>(
 export const subscribeToWakuTopic = async <Data, T extends Message>(
 	waku: WakuLight,
 	decoders: Decoder<T>[],
-	decodeMessage: (message: WithPayload<T>) => Promise<Data>,
+	decodeMessage: (message: WithPayload<T>) => Promise<Data | false>,
 	callback: (item: Data) => void,
 	onError?: (error: string) => void,
 	onDone?: () => void,
