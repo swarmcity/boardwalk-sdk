@@ -76,10 +76,6 @@ export const createItem = async (
 	{ price, description }: CreateItem,
 	signer: Signer,
 ) => {
-	if (!signer.provider) {
-		throw new Error()
-	}
-
 	// Create the metadata
 	const payload = ItemMetadata.encode({ description })
 	const hash = sha256(payload)
