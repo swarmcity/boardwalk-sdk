@@ -13,8 +13,12 @@ import { Marketplace } from '../../src/abi'
 // Services
 import { cancelItem, fundItem, newItem, payoutItem } from '../../src/services/item'
 import { createPermitProvider } from '../../src/services/select-provider'
-import { getMarketplaceContract } from '../../src/services/marketplace'
+import { getMarketplaceConfig, getMarketplaceContract } from '../../src/services/marketplace'
 import { Status } from '../../src/services/items'
+import { getReputation } from '../../src/services/reputation'
+
+// Types
+import type { Wallet } from 'ethers'
 
 // NOTE: Mostly tests the happy paths, as the failure
 // conditions are already tested in the contracts.
@@ -41,6 +45,21 @@ describe('item', async () => {
 		)
 
 		return signature
+	}
+
+	const getRep = async (address: string, wallet: Wallet) => {
+		return await getReputation(address, wallet.address, marketplace.provider)
+	}
+
+	const checkReputation = async (seekerAmount: bigint, providerAmount: bigint) => {
+		const { seekerRep, providerRep } = await getMarketplaceConfig(
+			marketplace.address,
+			['seekerRep', 'providerRep'],
+			marketplace.provider,
+		)
+
+		expect(await getRep(seekerRep, seeker)).toEqual(seekerAmount)
+		expect(await getRep(providerRep, provider)).toEqual(providerAmount)
 	}
 
 	beforeEach(async () => {
@@ -102,6 +121,9 @@ describe('item', async () => {
 		const contract = getMarketplaceContract(marketplace.address, seeker.provider)
 		const { status } = await contract.items(item.id)
 		expect(status).toEqual(Status.Funded)
+
+		// Make sure no reputation was minted
+		await checkReputation(0n, 0n)
 	})
 
 	test('pay a deal out', async () => {
@@ -120,6 +142,9 @@ describe('item', async () => {
 		const contract = getMarketplaceContract(marketplace.address, marketplace.provider)
 		const { status } = await contract.items(item.id)
 		expect(status).toEqual(Status.Done)
+
+		// Check if reputation was minted
+		await checkReputation(5n, 5n)
 	})
 
 	test('cancel a deal', async () => {
@@ -134,5 +159,8 @@ describe('item', async () => {
 		const contract = getMarketplaceContract(marketplace.address, marketplace.provider)
 		const { status } = await contract.items(item.id)
 		expect(status).toEqual(Status.Cancelled)
+
+		// Make sure no reputation was minted
+		await checkReputation(0n, 0n)
 	})
 })

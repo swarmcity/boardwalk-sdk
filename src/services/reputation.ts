@@ -8,5 +8,6 @@ export const getReputationContract = ERC20__factory.connect
 
 export const getReputation = async (token: string, user: string, provider: Provider) => {
 	const contract = getReputationContract(token, provider)
-	return await contract.balanceOf(user)
+	const reputation = await contract.balanceOf(user)
+	return reputation.toBigInt()
 }
