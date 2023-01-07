@@ -44,9 +44,11 @@ export const newItem = async (
 	const newItemTopic = contract.interface.getEventTopic('NewItem')
 	const newItemLog = receipt.logs.find((log: Log) => log.topics[0] === newItemTopic)
 
+	/* c8 ignore start */
 	if (!newItemLog) {
 		throw new Error('no new item event in the transaction')
 	}
+	/* c8 ignore stop */
 
 	const { args } = contract.interface.parseLog(newItemLog)
 	const item = {
