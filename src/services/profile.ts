@@ -59,12 +59,7 @@ const decodeMessage = (message: WithPayload<MessageV0>): Profile | false => {
 	)
 }
 
-export const createProfile = async (
-	waku: WakuLight,
-	connector: { getSigner: () => Promise<Signer> },
-	input: CreateProfile,
-) => {
-	const signer = await connector.getSigner()
+export const createProfile = async (waku: WakuLight, input: CreateProfile, signer: Signer) => {
 	const topic = getProfileTopic(await signer.getAddress())
 	const payload = await createSignedProto(
 		eip712Config,
@@ -77,7 +72,7 @@ export const createProfile = async (
 	return postWakuMessage(waku, topic, payload)
 }
 
-type ProfileRes = DecodeStoreCallback<Profile, MessageV0>
+export type ProfileRes = DecodeStoreCallback<Profile, MessageV0>
 
 export const subscribeToProfile = async (
 	waku: WakuLight,
