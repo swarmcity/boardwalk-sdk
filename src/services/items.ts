@@ -1,7 +1,6 @@
 import { DecoderV0, EncoderV0, MessageV0 } from 'js-waku/lib/waku_message/version_0'
 import { BigNumber, Event } from 'ethers'
 import { arrayify, Interface, sha256 } from 'ethers/lib/utils'
-import { Log } from '@ethersproject/providers'
 
 // Types
 import type { Signer } from 'ethers'
@@ -14,13 +13,12 @@ import type { Provider } from '@ethersproject/providers'
 import { ItemMetadata } from '../protos/item-metadata'
 
 // Lib
-import { numberToBigInt } from '../lib/tools'
 import { shouldUpdate } from '../lib/blockchain'
 import { subscribeToWakuTopic } from '../lib/waku'
 
 // Services
 import { getMarketplaceContract } from './marketplace'
-import { getERC20Contract } from './erc20'
+import { newItem } from './item'
 
 // Status
 export enum Status {
@@ -34,7 +32,7 @@ export enum Status {
 }
 
 export type CreateItem = {
-	price: number
+	price: bigint
 	description: string
 }
 
@@ -86,41 +84,14 @@ export const createItem = async (
 	const payload = ItemMetadata.encode({ description })
 	const hash = sha256(payload)
 
-	// Get the marketplace contract
-	const contract = getMarketplaceContract(marketplace, signer)
-
-	// Get token decimals
-	const tokenAddress = await contract.token()
-	const token = getERC20Contract(tokenAddress, signer)
-	const decimals = await token.decimals()
-
 	// Post the metadata on Waku
 	await waku.lightPush.push(new EncoderV0(getItemTopic(marketplace)), {
 		payload,
 	})
 
 	// Convert the price to bigint
-	const amount = numberToBigInt(price, decimals)
-	const amountToApprove = amount + (await contract.fee()).toBigInt() / 2n
-
-	// Approve the tokens to be spent by the marketplace
-	const approveTx = await token.approve(marketplace, amountToApprove)
-	await approveTx.wait()
-
-	// Post the item on chain
-	const tx = await contract.newItem(amount, arrayify(hash))
-	const { logs } = await tx.wait()
-
-	// Get the item ID
-	const newItemTopic = contract.interface.getEventTopic('NewItem')
-	const newItemLog = logs.find((log: Log) => log.topics[0] === newItemTopic)
-
-	if (!newItemLog) {
-		throw new Error('no new item event in the transaction')
-	}
-
-	const { args } = contract.interface.parseLog(newItemLog)
-	return args.id.toBigInt()
+	const { item } = await newItem(signer, marketplace, price, arrayify(hash))
+	return item
 }
 
 const decodeWakuMessage = async (message: WithPayload<MessageV0>): Promise<WakuItem> => {

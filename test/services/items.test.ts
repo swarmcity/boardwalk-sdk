@@ -54,10 +54,10 @@ describe('items', async () => {
 
 	test('item creation on-chain transaction succeeds', async () => {
 		const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
-		const id = await createItem(
+		const { id } = await createItem(
 			waku,
 			marketplace.address,
-			{ price: 123, description: 'Test item' },
+			{ price: 123n, description: 'Test item' },
 			user,
 		)
 		expect(id).toEqual(1n)
@@ -72,7 +72,7 @@ describe('items', async () => {
 		cleanupFns.push(unsubscribe)
 
 		// Create the item
-		await createItem(waku, marketplace.address, { price: 123, description: 'Test item' }, user)
+		await createItem(waku, marketplace.address, { price: 123n, description: 'Test item' }, user)
 
 		// Expected item
 		const expected = {
@@ -107,8 +107,8 @@ describe('items', async () => {
 		const items = pEvent<Record<string, ChainItem[]>>()
 
 		// Create item
-		await createItem(waku, marketplace.address, { price: 123, description: 'Test item' }, user)
-		await createItem(waku, marketplace.address, { price: 234, description: 'Toast item' }, user)
+		await createItem(waku, marketplace.address, { price: 123n, description: 'Test item' }, user)
+		await createItem(waku, marketplace.address, { price: 234n, description: 'Toast item' }, user)
 
 		// Subscribe to Waku items
 		// NOTE: This subscription does not sync items added later on
@@ -131,7 +131,7 @@ describe('items', async () => {
 					owner: user.address,
 					id: BigNumber.from(1),
 					metadata: '0x2d1dd148d3aa0bebf9ba0ad804cabab7fe0c78a435c084e51fc460694d3a7115',
-					price: BigNumber.from(123).mul(BigNumber.from(10).pow(18)),
+					price: BigNumber.from(123),
 					fee: BigNumber.from(12345),
 					seekerRep: BigNumber.from(0),
 					status: 1,
@@ -143,7 +143,7 @@ describe('items', async () => {
 					owner: user.address,
 					id: BigNumber.from(2),
 					metadata: '0x82245f28312b3f14be70a166a96f3defb030d540d84aaaeda11e56ee9680a7ab',
-					price: BigNumber.from(234).mul(BigNumber.from(10).pow(18)),
+					price: BigNumber.from(234),
 					fee: BigNumber.from(12345),
 					seekerRep: BigNumber.from(0),
 					status: 1,
