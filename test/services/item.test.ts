@@ -16,6 +16,8 @@ import { createPermitProvider } from '../../src/services/select-provider'
 import { getMarketplaceContract } from '../../src/services/marketplace'
 import { Status } from '../../src/services/items'
 
+// NOTE: Mostly tests the happy paths, as the failure
+// conditions are already tested in the contracts.
 describe('item', async () => {
 	const deployer = await generateWallet()
 	const seeker = await generateWallet()
