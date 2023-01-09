@@ -50,7 +50,8 @@ export const wrapFilterCallback = <Msg extends Message>(
 export const subscribeToLatestTopicData = <Msg extends Message>(
 	waku: WakuLight,
 	decoders: Decoder<Msg>[],
-	callback: (message?: Promise<Msg | undefined>) => Promise<boolean>,
+	callback: (message: Promise<Msg | undefined>) => Promise<boolean>,
+	onDone?: () => void,
 	options?: QueryOptions | undefined,
 	watch?: boolean,
 ) => {
@@ -69,7 +70,7 @@ export const subscribeToLatestTopicData = <Msg extends Message>(
 			}
 		}
 
-		callback()
+		onDone?.()
 	})()
 
 	if (watch) {
@@ -81,35 +82,7 @@ export const subscribeToLatestTopicData = <Msg extends Message>(
 
 export type DecodeStoreCallback<Data, Msg extends Message> = { data: Data; message: Msg }
 
-// Deprecated
 export const decodeStore = <Data, Msg extends Message>(
-	decodeMessage: (message: WithPayload<Msg>) => Data | false | Promise<Data | false>,
-	callback: (result?: DecodeStoreCallback<Data, Msg>) => void,
-	onlyGetLast = false,
-) => {
-	return async (msg: Promise<Msg | undefined> | undefined) => {
-		if (!msg) {
-			callback()
-			return onlyGetLast
-		}
-
-		const message = (await msg) as WithPayload<Msg>
-		if (!message) {
-			return false
-		}
-
-		const data = await decodeMessage(message)
-		if (data) {
-			callback({ data, message })
-			return onlyGetLast
-		}
-
-		return false
-	}
-}
-
-// Eventually rename to decodeStore
-export const decodeStoreClean = <Data, Msg extends Message>(
 	decodeMessage: (message: WithPayload<Msg>) => Data | false | Promise<Data | false>,
 	callback: (data: Data, message: Msg) => void,
 	onlyGetLast = false,
@@ -161,4 +134,10 @@ export const subscribeToWakuTopic = async <Msg extends Message>(
 		cancelled = true
 		await unsubscribe?.()
 	}
+}
+
+export const subscribeCombineCallback = <Data, Msg extends Message>(
+	fn: (result?: DecodeStoreCallback<Data, Msg>) => void,
+) => {
+	return (data: Data, message: Msg) => fn({ data, message })
 }

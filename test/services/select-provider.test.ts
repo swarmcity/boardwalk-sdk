@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from 'vitest'
 import { constants } from 'ethers'
 import { randomBytes } from 'node:crypto'
 import { arrayify } from 'ethers/lib/utils'
+import pDefer from 'p-defer'
 
 // Services
 import {
@@ -14,7 +15,7 @@ import {
 } from '../../src/services/select-provider'
 
 // Lib
-import { getWaku } from '../../src/lib/waku'
+import { getWaku, subscribeCombineCallback } from '../../src/lib/waku'
 
 // Utils
 import { generateWallet } from '../utils/ethers'
@@ -69,13 +70,14 @@ describe('select-provider', async () => {
 		const item = randomBigInt()
 
 		// Subscribe to events
+		const done = pDefer()
 		const callback = pEvent<SelectProviderResult | undefined>()
-		const result = await subscribeToSelectProvider(waku, address, item, callback.listener)
+		const combine = subscribeCombineCallback(callback.listener)
+		const result = await subscribeToSelectProvider(waku, address, item, combine, done.resolve)
 		await result?.unsubscribe.then((fn) => cleanupFns.push(fn))
 
-		// Except an empty callback (i.e. store query
-		// finished, but there were no results.)
-		expect(await callback.next()).to.equal(undefined)
+		// The store query is done and not results are available
+		expect(await done.promise).toEqual(undefined)
 
 		// Key exchange
 		const sigPubKey = generateKeyPair().publicKey

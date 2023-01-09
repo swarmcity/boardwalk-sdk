@@ -9,8 +9,8 @@ import {
 	postWakuMessage,
 	decodeStore,
 	DecodeStoreCallback,
+	subscribeCombineCallback,
 } from '../lib/waku'
-import { throwIfFasly } from '../lib/tools'
 
 // Protos
 import { ProfilePicture } from '../protos/profile-picture'
@@ -71,7 +71,8 @@ type ProfilePictureRes = DecodeStoreCallback<ProfilePicture, MessageV0>
 export const subscribeToProfilePicture = async (
 	waku: WakuLight,
 	hash: string,
-	callback: (response?: ProfilePictureRes) => void,
+	callback: (data: ProfilePicture, message: MessageV0) => void,
+	onDone?: () => void,
 	watch = true,
 ) => {
 	if (!hash) {
@@ -83,6 +84,7 @@ export const subscribeToProfilePicture = async (
 		waku,
 		decoders,
 		decodeStore(decodeMessage, callback, true),
+		onDone,
 		{},
 		watch,
 	)
@@ -93,7 +95,8 @@ export const getProfilePicture = async (
 	hash: string,
 ): Promise<ProfilePictureRes> => {
 	const defer = pDefer<ProfilePictureRes>()
-	const callback = throwIfFasly(defer, 'Could not fetch profile picture')
-	await subscribeToProfilePicture(waku, hash, callback, false)
+	const callback = subscribeCombineCallback(defer.resolve)
+	const notFound = () => defer.reject('Could not fetch profile picture')
+	await subscribeToProfilePicture(waku, hash, callback, notFound, false)
 	return defer.promise
 }
