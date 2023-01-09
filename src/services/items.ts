@@ -14,7 +14,7 @@ import { ItemMetadata } from '../protos/item-metadata'
 
 // Lib
 import { shouldUpdate } from '../lib/blockchain'
-import { decodeStoreClean, subscribeToWakuTopic } from '../lib/waku'
+import { decodeStore, subscribeToWakuTopic } from '../lib/waku'
 
 // Services
 import { getMarketplaceContract } from './marketplace'
@@ -108,7 +108,7 @@ export const subscribeToWakuItems = async (
 	return subscribeToWakuTopic(
 		waku,
 		[new DecoderV0(getItemTopic(marketplace))],
-		decodeStoreClean(decodeWakuMessage, callback),
+		decodeStore(decodeWakuMessage, callback),
 		onError,
 		onDone,
 		watch,

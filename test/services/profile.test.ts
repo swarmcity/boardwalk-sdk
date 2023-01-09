@@ -2,6 +2,7 @@ import { Protocols } from 'js-waku'
 import { afterEach, describe, expect, test } from 'vitest'
 import { randomBytes } from 'node:crypto'
 import { arrayify } from 'ethers/lib/utils'
+import pDefer from 'p-defer'
 
 // Utils
 import { generateWallet } from '../utils/ethers'
@@ -17,7 +18,7 @@ import {
 } from '../../src/services/profile'
 
 // Lib
-import { getWaku } from '../../src/lib/waku'
+import { getWaku, subscribeCombineCallback } from '../../src/lib/waku'
 
 describe('profile', async () => {
 	const waku = await getWaku([Protocols.LightPush, Protocols.Filter])
@@ -72,12 +73,14 @@ describe('profile', async () => {
 	test('can subscribe to profile updates', async () => {
 		const user = await generateWallet()
 		const callback = pEvent<ProfileRes | undefined>()
+		const done = pDefer()
 
-		const result = await subscribeToProfile(waku, user.address, callback.listener)
+		const combine = subscribeCombineCallback(callback.listener)
+		const result = await subscribeToProfile(waku, user.address, combine, done.resolve)
 		await result?.unsubscribe.then((fn) => cleanupFns.push(fn))
 
-		// The first callback is undefined because there's no result yet
-		expect(await callback.next()).toEqual(undefined)
+		// The store query is done and not results are available
+		expect(await done.promise).toEqual(undefined)
 
 		for (let i = 0; i < 5; i++) {
 			const input = {

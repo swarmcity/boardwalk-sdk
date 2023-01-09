@@ -3,7 +3,7 @@ import { equals } from 'uint8arrays/equals'
 import pDefer from 'p-defer'
 
 // Services
-import { DecodeStoreCallback, decodeStoreClean, subscribeToWakuTopic } from '../lib/waku'
+import { DecodeStoreCallback, decodeStore, subscribeToWakuTopic } from '../lib/waku'
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
@@ -103,7 +103,7 @@ export const subscribeToChatMessages = async (
 	return subscribeToWakuTopic(
 		waku,
 		decoders,
-		decodeStoreClean(decodeWakuMessage.bind(null, keys.signing), callback),
+		decodeStore(decodeWakuMessage.bind(null, keys.signing), callback),
 		onError,
 		onDone,
 		watch,

@@ -17,6 +17,7 @@ import {
 	decodeStore,
 	DecodeStoreCallback,
 	postWakuMessage,
+	subscribeCombineCallback,
 	subscribeToLatestTopicData,
 } from '../lib/waku'
 import {
@@ -178,7 +179,8 @@ export const subscribeToSelectProvider = async (
 	waku: WakuLight,
 	marketplace: string,
 	itemId: bigint,
-	callback: (response?: SelectProviderResult) => void,
+	callback: (data: SelectProvider, message: MessageV0) => void,
+	onDone?: () => void,
 	watch = true,
 ) => {
 	const decoders = [new DecoderV0(getSelectProviderTopic(marketplace, itemId))]
@@ -186,6 +188,7 @@ export const subscribeToSelectProvider = async (
 		waku,
 		decoders,
 		decodeStore(decodeMessage, callback, true),
+		onDone,
 		{},
 		watch,
 	)
@@ -197,6 +200,7 @@ export const getSelectProvider = async (
 	itemId: bigint,
 ): Promise<SelectProviderResult | undefined> => {
 	const defer = pDefer<SelectProviderResult | undefined>()
-	await subscribeToSelectProvider(waku, marketplace, itemId, defer.resolve, false)
+	const callback = subscribeCombineCallback(defer.resolve)
+	await subscribeToSelectProvider(waku, marketplace, itemId, callback, defer.reject, false)
 	return defer.promise
 }

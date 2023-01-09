@@ -11,12 +11,12 @@ import type { WithPayload } from '../lib/types'
 import { Profile } from '../protos/profile'
 
 // Lib
-import { throwIfFasly } from '../lib/tools'
 import {
 	subscribeToLatestTopicData,
 	postWakuMessage,
 	DecodeStoreCallback,
 	decodeStore,
+	subscribeCombineCallback,
 } from '../lib/waku'
 import { createSignedProto, decodeSignedPayload, EIP712Config } from '../lib/eip-712'
 
@@ -77,7 +77,8 @@ export type ProfileRes = DecodeStoreCallback<Profile, MessageV0>
 export const subscribeToProfile = async (
 	waku: WakuLight,
 	address: string,
-	callback: (response?: ProfileRes) => void,
+	callback: (data: Profile, message: MessageV0) => void,
+	onDone?: () => void,
 	watch = true,
 ) => {
 	const decoders = [new DecoderV0(getProfileTopic(address))]
@@ -85,6 +86,7 @@ export const subscribeToProfile = async (
 		waku,
 		decoders,
 		decodeStore(decodeMessage, callback, true),
+		onDone,
 		{},
 		watch,
 	)
@@ -92,7 +94,8 @@ export const subscribeToProfile = async (
 
 export const getProfile = async (waku: WakuLight, address: string): Promise<ProfileRes> => {
 	const defer = pDefer<ProfileRes>()
-	const callback = throwIfFasly(defer, 'Could not fetch profile')
-	await subscribeToProfile(waku, address, callback, false)
+	const callback = subscribeCombineCallback(defer.resolve)
+	const notFound = () => defer.reject(new Error('Could not fetch profile'))
+	await subscribeToProfile(waku, address, callback, notFound, false)
 	return defer.promise
 }
