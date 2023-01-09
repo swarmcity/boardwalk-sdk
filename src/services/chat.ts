@@ -3,11 +3,11 @@ import { equals } from 'uint8arrays/equals'
 import pDefer from 'p-defer'
 
 // Services
-import { decodeStore, DecodeStoreCallback, subscribeToLatestTopicData } from '../lib/waku'
+import { DecodeStoreCallback, decodeStoreClean, subscribeToWakuTopic } from '../lib/waku'
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
-import { WithPayload } from '../lib/types'
+import type { WithPayload } from '../lib/types'
 
 // Protos
 import { ChatMessage as ChatMessageProto } from '../protos/chat-message'
@@ -39,10 +39,10 @@ export const getChatMessageTopic = (marketplace: string, item: bigint) => {
 	return `/swarmcity/1/chat-message-${marketplace}-${item}/proto`
 }
 
-const decodeWakuMessage = async (
+const decodeWakuMessage = (
 	keys: PublicKeys,
 	message: WithPayload<MessageV1>,
-): Promise<ChatMessage | false> => {
+): ChatMessage | false => {
 	if (!message.signaturePublicKey) {
 		return false
 	}
@@ -93,16 +93,19 @@ export const subscribeToChatMessages = async (
 	marketplace: string,
 	item: bigint,
 	keys: ChatKeys,
-	callback: (response?: ChatMessageRes) => void,
+	callback: (data: ChatMessage, message: MessageV1) => void,
+	onError?: (error: string) => void,
+	onDone?: () => void,
 	watch = true,
 ) => {
 	const topic = getChatMessageTopic(marketplace, item)
 	const decoders = [new SymDecoder(topic, keys.symmetric)]
-	return subscribeToLatestTopicData(
+	return subscribeToWakuTopic(
 		waku,
 		decoders,
-		decodeStore(decodeWakuMessage.bind(null, keys.signing), callback),
-		{},
+		decodeStoreClean(decodeWakuMessage.bind(null, keys.signing), callback),
+		onError,
+		onDone,
 		watch,
 	)
 }
@@ -112,8 +115,21 @@ export const getChatMessages = async (
 	marketplace: string,
 	item: bigint,
 	keys: ChatKeys,
-): Promise<ChatMessageRes> => {
-	const defer = pDefer<ChatMessageRes>()
-	await subscribeToChatMessages(waku, marketplace, item, keys, defer.resolve, false)
+): Promise<ChatMessageRes[]> => {
+	const items: ChatMessageRes[] = []
+	const defer = pDefer<ChatMessageRes[]>()
+	const collect = (data: ChatMessage, message: MessageV1) => void items.push({ data, message })
+
+	await subscribeToChatMessages(
+		waku,
+		marketplace,
+		item,
+		keys,
+		collect,
+		defer.reject,
+		() => defer.resolve(items),
+		false,
+	)
+
 	return defer.promise
 }

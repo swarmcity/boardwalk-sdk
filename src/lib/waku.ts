@@ -81,6 +81,7 @@ export const subscribeToLatestTopicData = <Msg extends Message>(
 
 export type DecodeStoreCallback<Data, Msg extends Message> = { data: Data; message: Msg }
 
+// Deprecated
 export const decodeStore = <Data, Msg extends Message>(
 	decodeMessage: (message: WithPayload<Msg>) => Data | false | Promise<Data | false>,
 	callback: (result?: DecodeStoreCallback<Data, Msg>) => void,
@@ -107,32 +108,43 @@ export const decodeStore = <Data, Msg extends Message>(
 	}
 }
 
-export const subscribeToWakuTopic = async <Data, T extends Message>(
+// Eventually rename to decodeStore
+export const decodeStoreClean = <Data, Msg extends Message>(
+	decodeMessage: (message: WithPayload<Msg>) => Data | false | Promise<Data | false>,
+	callback: (data: Data, message: Msg) => void,
+	onlyGetLast = false,
+) => {
+	return async (msg: Promise<Msg | undefined>) => {
+		const message = (await msg) as WithPayload<Msg>
+		if (!message?.payload) {
+			return false
+		}
+
+		const data = await decodeMessage(message)
+		if (data) {
+			callback(data, message)
+			return onlyGetLast
+		}
+
+		return false
+	}
+}
+
+export const subscribeToWakuTopic = async <Msg extends Message>(
 	waku: WakuLight,
-	decoders: Decoder<T>[],
-	decodeMessage: (message: WithPayload<T>) => Promise<Data | false>,
-	callback: (item: Data) => void,
+	decoders: Decoder<Msg>[],
+	callback: (message: Promise<Msg | undefined>) => Promise<boolean>,
 	onError?: (error: string) => void,
 	onDone?: () => void,
 	watch = true,
 ) => {
 	let cancelled = false
-	const storeCallback = async (msg: Promise<T | undefined>) => {
+	const storeCallback = async (msg: Promise<Msg | undefined>) => {
 		if (cancelled) {
 			return true
 		}
 
-		const message = await msg
-		if (!message?.payload) {
-			return
-		}
-
-		const decoded = await decodeMessage(message as WithPayload<T>)
-		if (!decoded) {
-			return
-		}
-
-		callback(decoded)
+		callback(msg)
 	}
 
 	waku.store

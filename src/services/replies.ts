@@ -16,7 +16,7 @@ import { ItemReply } from '../protos/item-reply'
 import { KeyExchange } from '../protos/key-exchange'
 
 // Lib
-import { subscribeToWakuTopic } from '../lib/waku'
+import { decodeStoreClean, subscribeToWakuTopic } from '../lib/waku'
 
 export type CreateReply = {
 	text: string
@@ -140,7 +140,14 @@ export const subscribeToItemReplies = async (
 ) => {
 	const topic = getItemTopic(marketplace, item.toString())
 	const decoders = [new DecoderV0(topic)]
-	return subscribeToWakuTopic(waku, decoders, decodeWakuReply, callback, onError, onDone, watch)
+	return subscribeToWakuTopic(
+		waku,
+		decoders,
+		decodeStoreClean(decodeWakuReply, callback),
+		onError,
+		onDone,
+		watch,
+	)
 }
 
 export const getItemReplies = async (
