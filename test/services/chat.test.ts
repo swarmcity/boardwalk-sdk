@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'vitest'
 import { Protocols } from 'js-waku'
 import { randomBytes } from 'node:crypto'
-import { getSharedSecret } from 'noble-secp256k1'
+import { getSharedSecret } from '@noble/secp256k1'
 import { sha256 } from '@ethersproject/sha2'
 
 // Utils
