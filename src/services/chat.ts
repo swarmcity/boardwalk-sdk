@@ -19,8 +19,9 @@ type ChatMessage = {
 }
 
 type PublicKeys = {
-	me: Uint8Array
-	them: Uint8Array
+	seeker: Uint8Array
+	provider: Uint8Array
+	owner: Uint8Array
 }
 
 type PrivateKey = {
@@ -31,8 +32,7 @@ type ChatMessageRes = DecodeStoreCallback<ChatMessage, MessageV1>
 
 type ChatKeys = {
 	symmetric: Uint8Array
-	signing: PublicKeys & PrivateKey
-	encryption: PublicKeys & PrivateKey
+	signing: PublicKeys
 }
 
 export const getChatMessageTopic = (marketplace: string, item: bigint) => {
@@ -49,9 +49,8 @@ const decodeWakuMessage = (
 
 	const decoded = ChatMessageProto.decode(message.payload)
 	const valid = (() => {
-		const users: Array<keyof PublicKeys> = ['me', 'them']
-		for (const user of users) {
-			if (equals(message.signaturePublicKey, keys[user])) {
+		for (const key of Object.values(keys)) {
+			if (equals(message.signaturePublicKey, key)) {
 				return true
 			}
 		}

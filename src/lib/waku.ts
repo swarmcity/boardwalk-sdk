@@ -113,11 +113,7 @@ export const subscribeToWakuTopic = async <Msg extends Message>(
 ) => {
 	let cancelled = false
 	const storeCallback = async (msg: Promise<Msg | undefined>) => {
-		if (cancelled) {
-			return true
-		}
-
-		callback(msg)
+		return cancelled ? true : await callback(msg)
 	}
 
 	waku.store
