@@ -59,7 +59,7 @@
 	"dependencies": {
 		"@ethersproject/sha2": "^5.7.0",
 		"@multiformats/multiaddr": "11.0.7",
-		"js-waku": "0.30.0",
-		"noble-secp256k1": "^1.2.14"
+		"@noble/secp256k1": "^1.7.1",
+		"js-waku": "0.30.0"
 	}
 }
