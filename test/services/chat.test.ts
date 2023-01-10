@@ -60,11 +60,11 @@ describe('replies', async () => {
 		const post = postMessage.bind(null, marketplace, item)
 
 		const posts = [
-			{ user: seeker, message: 'Hey! How are you?' },
+			{ user: provider, message: 'Hey! How are you?' },
 			{ user: seeker, message: 'Good, you?' },
-			{ user: seeker, message: "Same. Here's your artwork by the way!" },
+			{ user: provider, message: "Same. Here's your artwork by the way!" },
 			{ user: seeker, message: "Huh, that's not at all what I asked..." },
-			{ user: seeker, message: "What's going on here?" },
+			{ user: owner, message: "What's going on here?" },
 		]
 
 		// Post a few messages
