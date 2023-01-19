@@ -17,6 +17,13 @@ export type NewItem = {
 	timestamp: bigint
 }
 
+/**
+ * Create a new item on a marketplace contract
+ * @param signer 
+ * @param marketplace 
+ * @param price 
+ * @param hash 
+ */
 export const newItem = async (
 	signer: Signer,
 	marketplace: string,
@@ -64,6 +71,13 @@ export const newItem = async (
 	return { item, receipt }
 }
 
+/**
+ * Fund the item
+ * @param signer 
+ * @param marketplace 
+ * @param item 
+ * @param signature 
+ */
 export const fundItem = async (
 	signer: Signer,
 	marketplace: string,
@@ -89,12 +103,24 @@ export const fundItem = async (
 	await tx.wait()
 }
 
+/**
+ * Cancel the item
+ * @param signer 
+ * @param marketplace 
+ * @param item 
+ */
 export const cancelItem = async (signer: Signer, marketplace: string, item: bigint) => {
 	const contract = getMarketplaceContract(marketplace, signer)
 	const tx = await contract.cancelItem(item)
 	await tx.wait()
 }
 
+/**
+ * Payout and finalize the item
+ * @param signer 
+ * @param marketplace 
+ * @param item 
+ */
 export const payoutItem = async (signer: Signer, marketplace: string, item: bigint) => {
 	const contract = getMarketplaceContract(marketplace, signer)
 	const tx = await contract.payoutItem(item)

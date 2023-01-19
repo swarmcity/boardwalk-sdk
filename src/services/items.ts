@@ -70,6 +70,13 @@ export const getItemTopic = (address: string) => {
 	return `/swarmcity/1/marketplace-items-${address}/proto`
 }
 
+/**
+ * Create an item and send to Waku
+ * @param waku
+ * @param marketplace
+ * @param param2
+ * @param signer
+ */
 export const createItem = async (
 	waku: WakuLight,
 	marketplace: string,
@@ -97,6 +104,15 @@ const decodeWakuMessage = async (message: WithPayload<MessageV0>): Promise<WakuI
 	}
 }
 
+/**
+ * Subscribe to a feed of items via Waku
+ * @param waku
+ * @param marketplace
+ * @param callback
+ * @param onError
+ * @param onDone
+ * @param watch
+ */
 export const subscribeToWakuItems = async (
 	waku: WakuLight,
 	marketplace: string,

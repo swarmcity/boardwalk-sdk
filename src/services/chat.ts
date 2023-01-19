@@ -34,7 +34,11 @@ type ChatKeys = {
 	symmetric: Uint8Array
 	signing: PublicKeys
 }
-
+/**
+ * Create a topic for the item chat
+ * @param marketplace
+ * @param item
+ */
 export const getChatMessageTopic = (marketplace: string, item: bigint) => {
 	return `/swarmcity/1/chat-message-${marketplace}-${item}/proto`
 }
@@ -67,6 +71,14 @@ const decodeWakuMessage = (
 	}
 }
 
+/**
+ * Post a chat message to Waku for a specific marketplace and item
+ * @param waku
+ * @param marketplace
+ * @param item
+ * @param message
+ * @param keys
+ */
 export const postChatMessage = async (
 	waku: WakuLight,
 	marketplace: string,
@@ -108,6 +120,19 @@ export const subscribeToChatMessages = async (
 		watch,
 	)
 }
+
+/**
+ *
+ * @param waku Get the chat messages for a specific marketplace and item
+ * @param marketplace
+ * @param item
+ * @param keys
+ * @param callback
+ * @param onError
+ * @param onDone
+ * @param watch
+ * @returns
+ */
 
 export const getChatMessages = async (
 	waku: WakuLight,
