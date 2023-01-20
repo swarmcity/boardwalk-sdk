@@ -7,17 +7,11 @@ import { Buffer } from 'node:buffer'
  */
 
 export function isBlob(blob: unknown): blob is Blob {
-	// browser
-	if (typeof Blob === 'function') {
-		return blob instanceof Blob
+	if (typeof Blob === 'undefined') {
+		return false
 	}
 
-	// node.js
-	const f = blob as Blob
-
-	return (
-		typeof f === 'object' && (typeof f.stream === 'function' || typeof f.arrayBuffer === 'function')
-	)
+	return blob instanceof Blob || toString.call(blob) === '[object Blob]'
 }
 
 /**
