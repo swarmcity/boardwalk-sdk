@@ -8,8 +8,7 @@
 	},
 	"scripts": {
 		"postinstall": "npm run blockchain:prepare && npm run blockchain:build && npm run blockchain:build-types",
-		"build": "npm run protos && rimraf dist && tsc && npm run build:types",
-		"build:types": "npm run protos && tsc --emitDeclarationOnly --declaration --outDir dist/types",
+		"build": "npm run protos && vite build",
 		"check:types": "tsc --project tsconfig.test.json",
 		"protos": "protons ./src/protos/*.proto",
 		"test": "npm run protos && vitest",
@@ -39,6 +38,7 @@
 		"@types/node": "^18.11.10",
 		"@typescript-eslint/eslint-plugin": "^5.45.0",
 		"@vitest/coverage-c8": "^0.26.3",
+		"buffer": "^6.0.3",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-import": "^2.26.0",
@@ -52,6 +52,7 @@
 		"typechain": "^8.1.1",
 		"typedoc": "^0.23.24",
 		"typescript": "^4.9.3",
+		"vite-plugin-dts": "^1.7.1",
 		"vitest": "^0.25.3"
 	},
 	"peerDependencies": {

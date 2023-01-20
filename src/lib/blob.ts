@@ -1,4 +1,4 @@
-import { Buffer } from 'node:buffer'
+import { Buffer } from 'buffer'
 
 /**
  * Compatibility functions for working with File API objects
