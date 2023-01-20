@@ -5,7 +5,7 @@ import pDefer from 'p-defer'
 
 // Types
 import type { Signer } from 'ethers'
-import type { WithPayload } from '../lib/types'
+import type { WithPayload } from '../types'
 
 // Protos
 import { Profile } from '../protos/profile'
@@ -20,7 +20,7 @@ import {
 } from '../lib/waku'
 import { createSignedProto, decodeSignedPayload, EIP712Config } from '../lib/eip-712'
 
-type CreateProfile = {
+export type CreateProfile = {
 	username: string
 	pictureHash: Uint8Array
 	date: string

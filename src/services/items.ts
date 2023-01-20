@@ -6,7 +6,7 @@ import { arrayify, Interface, sha256 } from 'ethers/lib/utils'
 import type { Signer } from 'ethers'
 import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { UpdateTime } from '../lib/blockchain'
-import type { WithPayload } from '../lib/types'
+import type { WithPayload } from '../types'
 import type { Provider } from '@ethersproject/providers'
 
 // Protos
@@ -54,12 +54,12 @@ export type ChainItem = {
 	provider?: string
 }
 
-type StatusChangeEvent = {
+export type StatusChangeEvent = {
 	id: BigNumber
 	status: Status
 }
 
-type FundItemEvent = {
+export type FundItemEvent = {
 	id: BigNumber
 	provider: string
 }
@@ -152,11 +152,11 @@ const decodeFundItemEvent = async (event: Event, iface: Interface): Promise<Fund
 	}
 }
 
-type Metadata = UpdateTime & {
+export type Metadata = UpdateTime & {
 	metadata: string
 }
 
-type MetadataIndex = Record<string, Metadata>
+export type MetadataIndex = Record<string, Metadata>
 
 export const subscribeToMarketplaceItems = (
 	address: string,

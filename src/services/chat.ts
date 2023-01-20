@@ -7,30 +7,30 @@ import { DecodeStoreCallback, decodeStore, subscribeToWakuTopic } from '../lib/w
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
-import type { WithPayload } from '../lib/types'
+import type { WithPayload } from '../types'
 
 // Protos
 import { ChatMessage as ChatMessageProto } from '../protos/chat-message'
 
 // Types
-type ChatMessage = {
+export type ChatMessage = {
 	date: Date
 	message: string
 }
 
-type PublicKeys = {
+export type PublicKeys = {
 	seeker: Uint8Array
 	provider: Uint8Array
 	owner: Uint8Array
 }
 
-type PrivateKey = {
+export type PrivateKey = {
 	private: Uint8Array
 }
 
-type ChatMessageRes = DecodeStoreCallback<ChatMessage, MessageV1>
+export type ChatMessageRes = DecodeStoreCallback<ChatMessage, MessageV1>
 
-type ChatKeys = {
+export type ChatKeys = {
 	symmetric: Uint8Array
 	signing: PublicKeys
 }

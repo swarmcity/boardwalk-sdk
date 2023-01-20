@@ -6,7 +6,7 @@ import pDefer from 'p-defer'
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { Signer } from 'ethers'
-import type { WithPayload } from '../lib/types'
+import type { WithPayload } from '../types'
 
 // Protos
 import { PermitProvider, SelectProvider } from '../protos/select-provider'
@@ -27,13 +27,13 @@ import {
 	verifyPayload,
 } from '../lib/eip-712'
 
-type Marketplace = {
+export type Marketplace = {
 	address: string
 	name: string
 	chainId: bigint
 }
 
-type CreateSelectProvider = {
+export type CreateSelectProvider = {
 	marketplace: Marketplace
 	provider: string
 	item: bigint

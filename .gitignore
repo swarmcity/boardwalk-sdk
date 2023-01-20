@@ -2,5 +2,6 @@ node_modules
 dist
 src/abi
 /src/protos/*.ts
+!/src/protos/index.ts
 /coverage
 /docs

@@ -1,3 +1,21 @@
+// Types
+export * from './types'
+
+// ABIs
+export * as abi from './abi'
+
+// Protos
+export * as protos from './protos'
+
+// Lib
+export * from './lib/blob'
+export * from './lib/blockchain'
+export * from './lib/eip-712'
+export * from './lib/ethers'
+export * from './lib/tools'
+export * from './lib/waku'
+
+// Services
 export * from './services/chat'
 export * from './services/erc20'
 export * from './services/item'

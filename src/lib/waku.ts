@@ -8,7 +8,7 @@ import { EncoderV0 } from 'js-waku/lib/waku_message/version_0'
 import type { Decoder, Message, WakuLight } from 'js-waku/lib/interfaces'
 import type { QueryOptions } from 'js-waku/lib/waku_store'
 import type { UnsubscribeFunction } from 'js-waku/lib/waku_filter'
-import type { WithPayload } from './types'
+import type { WithPayload } from '../types'
 
 const defaultOptions: CreateOptions = {}
 

@@ -17,7 +17,7 @@ import { ProfilePicture } from '../protos/profile-picture'
 
 // Types
 import type { WakuLight } from 'js-waku/lib/interfaces'
-import type { WithPayload } from '../lib/types'
+import type { WithPayload } from '../types'
 
 export const getProfilePictureTopic = (hash: string) => {
 	return `/swarmcity/1/profile-picture-${hash}/proto`
@@ -66,7 +66,7 @@ const decodeMessage = (message: WithPayload<MessageV0>): ProfilePicture | false 
 	}
 }
 
-type ProfilePictureRes = DecodeStoreCallback<ProfilePicture, MessageV0>
+export type ProfilePictureRes = DecodeStoreCallback<ProfilePicture, MessageV0>
 
 export const subscribeToProfilePicture = async (
 	waku: WakuLight,

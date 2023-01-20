@@ -13,14 +13,14 @@ export type EIP712Config = {
 	types: Record<string, TypedDataField[]>
 }
 
-type Proto<ProtoType> = {
+export type Proto<ProtoType> = {
 	encode: (obj: ProtoType) => Uint8Array
 	decode: (buf: Uint8Array | Uint8ArrayList) => ProtoType
 }
 
-type SignedPayload<Values> = Values & { signature: Uint8Array }
+export type SignedPayload<Values> = Values & { signature: Uint8Array }
 
-type VerifyPayloadConfig<ProtoType> = {
+export type VerifyPayloadConfig<ProtoType> = {
 	formatValue: (payload: ProtoType, address: string) => Record<string, unknown>
 	getSigner: (payload: ProtoType) => string | Uint8Array
 	getSignature?: (payload: ProtoType) => SignatureLike

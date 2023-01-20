@@ -9,7 +9,7 @@ import pDefer from 'p-defer'
 import type { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
 import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { Signer } from 'ethers'
-import type { WithPayload } from '../lib/types'
+import type { WithPayload } from '../types'
 
 // Protos
 import { ItemReply } from '../protos/item-reply'

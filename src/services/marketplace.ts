@@ -31,7 +31,7 @@ export const getMarketplaceContract = (address: string, signerOrProvider: Signer
 	return Marketplace__factory.connect(address, signerOrProvider)
 }
 
-type MarketplaceConfig = {
+export type MarketplaceConfig = {
 	name: string
 	fee: BigNumberish
 	token: string
