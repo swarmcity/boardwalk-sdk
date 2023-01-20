@@ -1,5 +1,5 @@
 {
-	"include": ["src", "test"],
+	"include": ["src"],
 	"exclude": ["node_modules", "dist"],
 	"compilerOptions": {
 		"alwaysStrict": true,
@@ -16,5 +16,9 @@
 		"module": "es2020",
 		"outDir": "dist",
 		"types": ["node"]
+	},
+	"typedocOptions": {
+		"entryPoints": ["src/index.ts"],
+		"out": "docs"
 	}
 }
