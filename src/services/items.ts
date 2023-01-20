@@ -66,7 +66,7 @@ type FundItemEvent = {
 
 export type Item = Omit<ChainItem, 'metadata'> & { metadata: ItemMetadata }
 
-export const getItemTopic = (address: string) => {
+export const getItemsTopic = (address: string) => {
 	return `/swarmcity/1/marketplace-items-${address}/proto`
 }
 
@@ -81,7 +81,7 @@ export const createItem = async (
 	const hash = sha256(payload)
 
 	// Post the metadata on Waku
-	await waku.lightPush.push(new EncoderV0(getItemTopic(marketplace)), {
+	await waku.lightPush.push(new EncoderV0(getItemsTopic(marketplace)), {
 		payload,
 	})
 
@@ -107,7 +107,7 @@ export const subscribeToWakuItems = async (
 ) => {
 	return subscribeToWakuTopic(
 		waku,
-		[new DecoderV0(getItemTopic(marketplace))],
+		[new DecoderV0(getItemsTopic(marketplace))],
 		decodeStore(decodeWakuMessage, callback),
 		onError,
 		onDone,

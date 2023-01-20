@@ -55,8 +55,8 @@ const TYPES: Record<string, Array<TypedDataField>> = {
 	],
 }
 
-export const getItemTopic = (marketplace: string, item: string) => {
-	return `/swarmcity/1/marketplace-${marketplace}-item-${item}/proto`
+export const getRepliesTopic = (marketplace: string, item: string) => {
+	return `/swarmcity/1/marketplace-${marketplace}-item-${item}-replies/proto`
 }
 
 export const createReply = async (
@@ -89,7 +89,9 @@ export const createReply = async (
 	})
 
 	// Post the metadata on Waku
-	await waku.lightPush.push(new EncoderV0(getItemTopic(marketplace, item.toString())), { payload })
+	await waku.lightPush.push(new EncoderV0(getRepliesTopic(marketplace, item.toString())), {
+		payload,
+	})
 }
 
 const verifyReplySignature = (reply: ItemReply) => {
@@ -138,7 +140,7 @@ export const subscribeToItemReplies = async (
 	onDone?: () => void,
 	watch = true,
 ) => {
-	const topic = getItemTopic(marketplace, item.toString())
+	const topic = getRepliesTopic(marketplace, item.toString())
 	const decoders = [new DecoderV0(topic)]
 	return subscribeToWakuTopic(
 		waku,
