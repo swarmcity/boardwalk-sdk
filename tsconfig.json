@@ -15,7 +15,8 @@
 		"rootDirs": ["src"],
 		"module": "es2020",
 		"outDir": "dist",
-		"types": ["node"]
+		"types": ["node"],
+		"skipLibCheck": true
 	},
 	"typedocOptions": {
 		"entryPoints": ["src/index.ts"],

@@ -3,3 +3,4 @@ dist
 src/abi
 /src/protos/*.ts
 /coverage
+/docs

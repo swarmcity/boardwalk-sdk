@@ -20,7 +20,8 @@
 		"waku:start": "docker-compose -f ./test/docker-compose.yaml up -d",
 		"waku:stop": "docker kill test-waku-1",
 		"lint": "eslint . --ext .ts,.tsx && prettier -c .",
-		"lint:fix": "eslint . --ext .ts,.tsx --fix && prettier -w . "
+		"lint:fix": "eslint . --ext .ts,.tsx --fix && prettier -w .",
+		"typedoc": "typedoc"
 	},
 	"repository": {
 		"type": "git",
