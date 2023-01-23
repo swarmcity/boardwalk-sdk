@@ -101,15 +101,15 @@ export const postChatMessage = async (
 
 /**
  * Fetch and optionally subscribe to messages
- * @param waku 
- * @param marketplace 
- * @param item 
- * @param keys 
- * @param callback 
- * @param onError 
- * @param onDone 
- * @param watch 
- * @returns 
+ * @param waku
+ * @param marketplace
+ * @param item
+ * @param keys
+ * @param callback
+ * @param onError
+ * @param onDone
+ * @param watch
+ * @returns
  */
 export const subscribeToChatMessages = async (
 	waku: WakuLight,
@@ -135,7 +135,7 @@ export const subscribeToChatMessages = async (
 
 /**
  *
- * @param waku Get the chat messages for a specific marketplace and item and don't listen
+ * @param waku Get the chat messages for a specific marketplace and item without subscribing
  * @param marketplace
  * @param item
  * @param keys
@@ -143,7 +143,7 @@ export const subscribeToChatMessages = async (
  * @param onError
  * @param onDone
  * @param watch
- * @returns 
+ * @returns
  */
 
 export const getChatMessages = async (

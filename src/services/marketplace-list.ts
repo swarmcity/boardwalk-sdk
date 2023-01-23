@@ -23,6 +23,12 @@ export type MarketplaceListItem = {
 
 export type MarketplaceList = Record<string, MarketplaceListItem>
 
+/**
+ * Connect to a marketplace list contract instance
+ * @param address The address of a marketplacelist contract
+ * @param signerOrProvider 
+ * @returns 
+ */
 export const getMarketplaceListContract = (
 	address: string,
 	signerOrProvider: Signer | Provider,
@@ -30,6 +36,13 @@ export const getMarketplaceListContract = (
 	return MarketplaceList__factory.connect(address, signerOrProvider)
 }
 
+/**
+ * Get the feed of marketplaces from the marketplacelist contract
+ * @param provider 
+ * @param address The address of the marketplace list contract
+ * @param fromBlock Start reading from block number
+ * @returns 
+ */
 export const getMarketplaceList = async (
 	provider: Provider,
 	address: string,

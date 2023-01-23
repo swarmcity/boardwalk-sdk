@@ -72,7 +72,7 @@ export const newItem = async (
 }
 
 /**
- * Fund the item
+ * Fund the item on the marketplace contract
  * @param signer 
  * @param marketplace 
  * @param item 
@@ -104,7 +104,7 @@ export const fundItem = async (
 }
 
 /**
- * Cancel the item
+ * Cancel the item on the marketplace contract
  * @param signer 
  * @param marketplace 
  * @param item 
@@ -116,7 +116,7 @@ export const cancelItem = async (signer: Signer, marketplace: string, item: bigi
 }
 
 /**
- * Payout and finalize the item
+ * Payout and finalize the item on the marketplace contract
  * @param signer 
  * @param marketplace 
  * @param item 

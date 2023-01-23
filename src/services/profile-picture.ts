@@ -19,10 +19,22 @@ import { ProfilePicture } from '../protos/profile-picture'
 import type { WakuLight } from 'js-waku/lib/interfaces'
 import type { WithPayload } from '../lib/types'
 
+/**
+ * Returns the formatted topic for a profile picture
+ * @param hash
+ * @returns
+ */
 export const getProfilePictureTopic = (hash: string) => {
 	return `/swarmcity/1/profile-picture-${hash}/proto`
 }
 
+/**
+ * Store the profile picture in a waku feed
+ * @param waku
+ * @param data The profile picture data
+ * @param type Blob, Buffer
+ * @returns
+ */
 export const createProfilePicture = async <Data extends Uint8Array | Blob>(
 	waku: WakuLight,
 	data: Data,
@@ -68,6 +80,15 @@ const decodeMessage = (message: WithPayload<MessageV0>): ProfilePicture | false 
 
 type ProfilePictureRes = DecodeStoreCallback<ProfilePicture, MessageV0>
 
+/**
+ * Subscribe to the profile picture feed
+ * @param waku
+ * @param hash
+ * @param callback
+ * @param onDone
+ * @param watch
+ * @returns
+ */
 export const subscribeToProfilePicture = async (
 	waku: WakuLight,
 	hash: string,
@@ -90,6 +111,12 @@ export const subscribeToProfilePicture = async (
 	)
 }
 
+/**
+ * Get a profile picture from waku feed
+ * @param waku
+ * @param hash
+ * @returns
+ */
 export const getProfilePicture = async (
 	waku: WakuLight,
 	hash: string,

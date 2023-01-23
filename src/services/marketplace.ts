@@ -27,6 +27,12 @@ export type MarketplaceItem = {
 	status: Status
 }
 
+/**
+ * Connect to an instance of a marketplace contract
+ * @param address
+ * @param signerOrProvider
+ * @returns
+ */
 export const getMarketplaceContract = (address: string, signerOrProvider: Signer | Provider) => {
 	return Marketplace__factory.connect(address, signerOrProvider)
 }
@@ -42,6 +48,13 @@ type MarketplaceConfig = {
 	itemId: BigNumber
 }
 
+/**
+ * Get the marketplace contract instance's dat
+ * @param address The address of the marketplace contract
+ * @param keys Array of which params to get from the contract
+ * @param provider
+ * @returns
+ */
 export const getMarketplaceConfig = async <Keys extends keyof MarketplaceConfig>(
 	address: string,
 	keys: Keys[],
@@ -69,6 +82,12 @@ export const getMarketplaceConfig = async <Keys extends keyof MarketplaceConfig>
 	}, {} as Pick<MarketplaceConfig, Keys>)
 }
 
+/**
+ * Get the token contract for a specific marketplace contract
+ * @param marketplace
+ * @param signerOrProvider
+ * @returns
+ */
 export const getMarketplaceTokenContract = async (
 	marketplace: string,
 	signerOrProvider: Signer | Provider,
@@ -81,11 +100,25 @@ export const getMarketplaceTokenContract = async (
 	return getERC20Contract(token, signerOrProvider)
 }
 
+/**
+ * Get the decimals for a token contract used by a specific marketplace contract
+ * @param address
+ * @param provider
+ * @returns
+ */
 export const getMarketplaceTokenDecimals = async (address: string, provider: Provider) => {
 	const token = await getMarketplaceTokenContract(address, provider)
 	return await token.decimals()
 }
 
+/**
+ * Get a specific marketplace contract item and subscribe to it
+ * @param marketplace
+ * @param itemId
+ * @param wsProvider
+ * @param callback
+ * @returns
+ */
 export const getMarketplaceItem = async (
 	marketplace: string,
 	itemId: bigint,
@@ -129,6 +162,13 @@ export const getMarketplaceItem = async (
 	return { item, unsubscribe }
 }
 
+/**
+ * Get the seeker reputation on a specific marketplace
+ * @param marketplace
+ * @param user
+ * @param provider
+ * @returns
+ */
 export const getMarketplaceSeekerReputation = async (
 	marketplace: string,
 	user: string,
@@ -138,6 +178,13 @@ export const getMarketplaceSeekerReputation = async (
 	return getReputation(seekerRep, user, provider)
 }
 
+/**
+ * Get the provider reputation on a specific marketplace
+ * @param marketplace 
+ * @param user 
+ * @param provider 
+ * @returns 
+ */
 export const getMarketplaceProviderReputation = async (
 	marketplace: string,
 	user: string,
@@ -147,6 +194,12 @@ export const getMarketplaceProviderReputation = async (
 	return getReputation(providerRep, user, provider)
 }
 
+/**
+ * Get the  number of items on a specific marketplace contract
+ * @param marketplace 
+ * @param provider 
+ * @returns 
+ */
 export const getMarketplaceDealCount = async (marketplace: string, provider: Provider) => {
 	const { itemId } = await getMarketplaceConfig(marketplace, ['itemId'], provider)
 	return itemId.sub(1)

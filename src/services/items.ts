@@ -71,7 +71,7 @@ export const getItemTopic = (address: string) => {
 }
 
 /**
- * Create an item and send to Waku
+ * Create a marketplace item and send to Waku
  * @param waku
  * @param marketplace
  * @param param2
@@ -105,7 +105,7 @@ const decodeWakuMessage = async (message: WithPayload<MessageV0>): Promise<WakuI
 }
 
 /**
- * Subscribe to a feed of items via Waku
+ * Subscribe to a feed of marketplace items via Waku
  * @param waku
  * @param marketplace
  * @param callback
@@ -174,6 +174,15 @@ type Metadata = UpdateTime & {
 
 type MetadataIndex = Record<string, Metadata>
 
+/**
+ * Subscribe to the feed of items for a specific marketplace
+ * @param address The contract address for the marketplace   
+ * @param provider 
+ * @param wsProvider 
+ * @param callback 
+ * @param onDone 
+ * @returns 
+ */
 export const subscribeToMarketplaceItems = (
 	address: string,
 	provider: Provider,
@@ -296,6 +305,16 @@ export const subscribeToMarketplaceItems = (
 	}
 }
 
+/**
+ * Subscribe to a feed of items for a specific marketplace via Waku
+ * @param waku 
+ * @param provider 
+ * @param wsProvider 
+ * @param marketplace 
+ * @param callback 
+ * @param onDone 
+ * @returns 
+ */
 export const subscribeToItems = async (
 	waku: WakuLight,
 	provider: Provider,
