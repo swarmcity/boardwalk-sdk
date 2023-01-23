@@ -43,6 +43,11 @@ const eip712Config: EIP712Config = {
 	},
 }
 
+/**
+ * Format the profile picture topic
+ * @param address
+ * @returns
+ */
 export const getProfileTopic = (address?: string) => {
 	return address ? `/swarmcity/1/profile-${getAddress(address)}/proto` : ''
 }
@@ -59,6 +64,13 @@ const decodeMessage = (message: WithPayload<MessageV0>): Profile | false => {
 	)
 }
 
+/**
+ * Create profile by sending a signed message to waku
+ * @param waku
+ * @param input
+ * @param signer
+ * @returns
+ */
 export const createProfile = async (waku: WakuLight, input: CreateProfile, signer: Signer) => {
 	const topic = getProfileTopic(await signer.getAddress())
 	const payload = await createSignedProto(
@@ -74,6 +86,15 @@ export const createProfile = async (waku: WakuLight, input: CreateProfile, signe
 
 export type ProfileRes = DecodeStoreCallback<Profile, MessageV0>
 
+/**
+ * Subscribe to the profile on waku
+ * @param waku
+ * @param address
+ * @param callback
+ * @param onDone
+ * @param watch
+ * @returns
+ */
 export const subscribeToProfile = async (
 	waku: WakuLight,
 	address: string,
@@ -92,6 +113,12 @@ export const subscribeToProfile = async (
 	)
 }
 
+/**
+ * Get a profile from waku
+ * @param waku
+ * @param address
+ * @returns
+ */
 export const getProfile = async (waku: WakuLight, address: string): Promise<ProfileRes> => {
 	const defer = pDefer<ProfileRes>()
 	const callback = subscribeCombineCallback(defer.resolve)

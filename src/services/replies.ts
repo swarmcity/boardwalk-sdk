@@ -55,10 +55,25 @@ const TYPES: Record<string, Array<TypedDataField>> = {
 	],
 }
 
+/**
+ * Format and return an item topic
+ * @param marketplace 
+ * @param item 
+ * @returns 
+ */
 export const getItemTopic = (marketplace: string, item: string) => {
 	return `/swarmcity/1/marketplace-${marketplace}-item-${item}/proto`
 }
 
+/**
+ * Create a reply for an item on a marketplace
+ * @param waku 
+ * @param marketplace 
+ * @param item 
+ * @param param3 
+ * @param keyExchange 
+ * @param signer 
+ */
 export const createReply = async (
 	waku: WakuLight,
 	marketplace: string,
@@ -129,6 +144,17 @@ const decodeWakuReply = async (
 	}
 }
 
+/**
+ * Subscribe to the feed of item replies
+ * @param waku 
+ * @param marketplace 
+ * @param item 
+ * @param callback 
+ * @param onError 
+ * @param onDone 
+ * @param watch 
+ * @returns 
+ */
 export const subscribeToItemReplies = async (
 	waku: WakuLight,
 	marketplace: string,
@@ -150,6 +176,13 @@ export const subscribeToItemReplies = async (
 	)
 }
 
+/**
+ * Get the item replies 
+ * @param waku 
+ * @param marketplace 
+ * @param item 
+ * @returns 
+ */
 export const getItemReplies = async (
 	waku: WakuLight,
 	marketplace: string,

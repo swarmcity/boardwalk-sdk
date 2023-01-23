@@ -68,6 +68,11 @@ const selectProviderEip712Config: EIP712Config = {
 	},
 }
 
+/**
+ * filoozom help
+ * @param marketplace
+ * @returns
+ */
 export const formatPermitProviderEIP712Config = (marketplace: Marketplace) => {
 	const config = { ...permitProviderEip712Config }
 	config.domain = {
@@ -79,6 +84,12 @@ export const formatPermitProviderEIP712Config = (marketplace: Marketplace) => {
 	return config
 }
 
+/**
+ * Format and return the topic of an item for selecting a provider
+ * @param marketplace
+ * @param itemId
+ * @returns
+ */
 export const getSelectProviderTopic = (marketplace: string, itemId: bigint) => {
 	marketplace = getAddress(marketplace)
 	return `/swarmcity/1/marketplace-${marketplace}-item-${itemId}-select-provider/proto`
@@ -92,6 +103,12 @@ const toArray = <Condition extends boolean>(
 	return (condition ? arrayify(string) : string) as any
 }
 
+/**
+ * filoozom help
+ * @param data
+ * @param signer
+ * @returns
+ */
 export const createPermitProvider = async (data: CreateSelectProvider, signer: Signer) => {
 	const formatMarketplace = <Condition extends boolean>(array: Condition) => ({
 		...data.marketplace,
